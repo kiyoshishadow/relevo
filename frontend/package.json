@@ -1,0 +1,21 @@
+{
+  "name": "relevo-frontend",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node --test \"src/test/*.test.js\""
+  },
+  "dependencies": {
+    "@fontsource-variable/archivo": "^5.2.8",
+    "@fontsource/ibm-plex-mono": "^5.2.7",
+    "gsap": "^3.13.0",
+    "three": "^0.186.1"
+  },
+  "devDependencies": {
+    "vite": "^7.1.11"
+  }
+}

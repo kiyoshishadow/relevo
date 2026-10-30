@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: relevo
+    runtime: node
+    plan: free
+    buildCommand: npm ci --include=dev && npm --prefix reports ci --include=dev && npm --prefix frontend ci --include=dev && npm run build
+    startCommand: npm run db:migrate && npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 24.18.1
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: TRUST_PROXY
+        value: "true"
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: CORS_ORIGINS
+        value: ""
+      - key: DATABASE_POOL_MAX
+        value: "3"
+      - key: NOTIFICATIONS_AUTO_PROCESS
+        value: "false"
+      - key: DATABASE_URL
+        sync: false

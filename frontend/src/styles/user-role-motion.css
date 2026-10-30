@@ -1,0 +1,41 @@
+/* A quiet credential outline that assembles only after the server confirms a role change. */
+.users-table [data-user-role-cell] {
+  position: relative;
+  min-width: 8.5rem;
+}
+
+.users-table [data-user-role-label] {
+  position: relative;
+  z-index: 1;
+}
+
+.users-table [data-user-role-frame] {
+  position: absolute;
+  z-index: 0;
+  inset: .22rem .48rem;
+  border-radius: .38rem;
+  opacity: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--signal, #e7b94a), var(--signal, #e7b94a)) left top / .58rem 2px no-repeat,
+    linear-gradient(var(--signal, #e7b94a), var(--signal, #e7b94a)) left top / 2px .58rem no-repeat,
+    linear-gradient(var(--signal, #e7b94a), var(--signal, #e7b94a)) right top / .58rem 2px no-repeat,
+    linear-gradient(var(--signal, #e7b94a), var(--signal, #e7b94a)) right top / 2px .58rem no-repeat,
+    linear-gradient(var(--signal, #e7b94a), var(--signal, #e7b94a)) left bottom / .58rem 2px no-repeat,
+    linear-gradient(var(--signal, #e7b94a), var(--signal, #e7b94a)) left bottom / 2px .58rem no-repeat,
+    linear-gradient(var(--signal, #e7b94a), var(--signal, #e7b94a)) right bottom / .58rem 2px no-repeat,
+    linear-gradient(var(--signal, #e7b94a), var(--signal, #e7b94a)) right bottom / 2px .58rem no-repeat;
+}
+
+.users-table [data-user-role-frame].is-active {
+  opacity: 1;
+}
+
+@media (max-width: 760px) {
+  .users-table [data-user-role-cell] { min-width: 7.25rem; }
+  .users-table [data-user-role-frame] { inset-inline: .22rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .users-table [data-user-role-frame] { opacity: 0 !important; }
+}

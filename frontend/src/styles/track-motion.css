@@ -1,0 +1,187 @@
+/* Movimiento ligado a la escena y al historial real del caso. */
+.track-device-view__scene .device-stage-orbit {
+  border-top-color: rgb(245 225 172 / 56%);
+  animation: track-orbit-turn 34s linear infinite;
+  transform-origin: center;
+}
+
+.track-device-view__scene .device-stage-signal {
+  position: relative;
+  flex: 0 0 auto;
+  box-shadow: 0 0 12px rgb(223 189 104 / 48%);
+}
+
+.track-device-view__scene .device-stage-signal::after {
+  position: absolute;
+  inset: -4px;
+  border: 1px solid rgb(223 189 104 / 68%);
+  border-radius: inherit;
+  content: '';
+  animation: track-signal-ping 2.8s ease-out infinite;
+}
+
+.track-summary-status .pill {
+  transform-origin: left center;
+}
+
+.track-result .case-flow__item::after {
+  transform: scaleY(var(--case-link-progress, 1));
+  transform-origin: top center;
+}
+
+.track-result .case-flow__item { display: block; }
+
+.track-result .case-flow__item.has-unrecorded-gap::after {
+  background: repeating-linear-gradient(to bottom, color-mix(in srgb, var(--signal) 38%, var(--line)) 0 3px, transparent 3px 7px);
+}
+
+.case-flow__step {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  grid-template-columns: 1.55rem minmax(0, 1fr);
+  align-items: start;
+  gap: .72rem;
+  padding: 0;
+  border: 0;
+  border-radius: .55rem;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.case-flow__step .case-flow__content { display: block; }
+
+.case-flow__step:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--signal) 72%, white);
+  outline-offset: 4px;
+}
+
+.case-flow__step:hover .case-flow__marker,
+.case-flow__step.is-selected .case-flow__marker {
+  border-color: var(--signal);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--signal) 14%, transparent);
+}
+
+.case-flow__step:hover .case-flow__line b,
+.case-flow__step.is-selected .case-flow__line b {
+  color: var(--ink);
+}
+
+.track-focus-readout {
+  display: grid;
+  min-width: 0;
+  gap: .18rem;
+  margin: .1rem 0 .95rem;
+  padding: .62rem .75rem;
+  border-left: 2px solid var(--signal);
+  border-radius: 0 .55rem .55rem 0;
+  background: color-mix(in srgb, var(--signal) 8%, white);
+}
+
+.track-focus-readout > span {
+  color: var(--ink-mute);
+  font: 650 .59rem/1.4 var(--font-mono);
+  letter-spacing: .08em;
+}
+
+.track-focus-readout strong {
+  color: var(--ink);
+  font-size: .91rem;
+}
+
+.track-focus-readout time {
+  color: var(--ink-mute);
+  font-size: .71rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.case-flow__item.is-current .case-flow__marker {
+  position: relative;
+  isolation: isolate;
+}
+
+.case-flow__item.is-current .case-flow__marker::after {
+  position: absolute;
+  z-index: -1;
+  inset: -5px;
+  border: 1px solid color-mix(in srgb, var(--signal) 56%, transparent);
+  border-radius: 50%;
+  content: '';
+  animation: track-current-halo 2.6s ease-out infinite;
+}
+
+.track-device-view__details .device-assembly-toggle:active {
+  transform: translateY(0) scale(.985);
+}
+
+.track-credential-form .field {
+  min-width: 0;
+}
+
+.track-credential-form .field input {
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.track-credential-form .field.is-invalid input {
+  border-color: #a74336;
+  box-shadow: 0 0 0 3px rgb(167 67 54 / 12%);
+}
+
+.track-field-error {
+  display: block;
+  min-height: 1.2em;
+  margin-top: .25rem;
+  color: #963c31;
+  font-size: .78rem;
+}
+
+.track-credential-form input:focus-visible,
+.track-credential-form button:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--signal) 72%, white);
+  outline-offset: 3px;
+}
+
+/* Fallback SVG y movimiento reducido: el movimiento elegido produce un
+   ángulo de inspección estático. No anima piezas ni insinúa una reparación. */
+.track-device-view__scene:not([data-3d-ready='true']) .phone-fallback-inner {
+  transform: perspective(760px) rotateX(var(--track-inspect-tilt, 0deg)) rotateY(var(--track-inspect-turn, 0deg)) translateY(var(--track-inspect-lift, 0px));
+  transform-origin: 50% 62%;
+  transition: transform 520ms cubic-bezier(.22, 1, .36, 1);
+}
+
+.track-device-view__scene[data-focus-status='received'] { --track-inspect-turn: -12deg; --track-inspect-tilt: -2deg; --track-inspect-lift: -2px; }
+.track-device-view__scene[data-focus-status='diagnosing'] { --track-inspect-turn: -4deg; --track-inspect-tilt: 1deg; --track-inspect-lift: 4px; }
+.track-device-view__scene[data-focus-status='awaiting_approval'] { --track-inspect-turn: 3deg; --track-inspect-tilt: -1deg; --track-inspect-lift: 0px; }
+.track-device-view__scene[data-focus-status='awaiting_payment'] { --track-inspect-turn: 8deg; --track-inspect-tilt: 1deg; --track-inspect-lift: 2px; }
+.track-device-view__scene[data-focus-status='repairing'] { --track-inspect-turn: 12deg; --track-inspect-tilt: 2deg; --track-inspect-lift: 5px; }
+.track-device-view__scene[data-focus-status='ready'] { --track-inspect-turn: 6deg; --track-inspect-tilt: -1deg; --track-inspect-lift: 6px; }
+.track-device-view__scene[data-focus-status='delivered'] { --track-inspect-turn: -9deg; --track-inspect-tilt: 1deg; --track-inspect-lift: 1px; }
+.track-device-view__scene[data-focus-status='cancelled'] { --track-inspect-turn: -14deg; --track-inspect-tilt: -1deg; --track-inspect-lift: -1px; }
+
+@keyframes track-orbit-turn {
+  to { rotate: 360deg; }
+}
+@keyframes track-signal-ping {
+  0% { transform: scale(.72); opacity: .72; }
+  75%, 100% { transform: scale(1.8); opacity: 0; }
+}
+
+@keyframes track-current-halo {
+  0% { transform: scale(.76); opacity: .78; }
+  78%, 100% { transform: scale(1.55); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .track-device-view__scene .device-stage-orbit,
+  .track-device-view__scene .device-stage-signal::after,
+  .case-flow__item.is-current .case-flow__marker::after {
+    animation: none;
+  }
+  .track-result .case-flow__item::after { transform: none; }
+  .track-credential-form .field input { transition: none; }
+  .track-device-view__scene:not([data-3d-ready='true']) .phone-fallback-inner { transition: none; }
+}

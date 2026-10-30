@@ -1,0 +1,67 @@
+/* Portal: guía breve para el gesto principal y respuesta de la consulta. */
+.hero-art .portal-scene-guide {
+  display: flex;
+  min-height: 2.5rem;
+  align-items: flex-start;
+  gap: .55rem;
+  margin: .75rem .1rem 0;
+  color: var(--ink-mute);
+  font-size: .76rem;
+  line-height: 1.45;
+}
+
+.portal-scene-indicator {
+  position: relative;
+  flex: 0 0 .48rem;
+  width: .48rem;
+  height: .48rem;
+  margin-top: .25rem;
+  border-radius: 50%;
+  background: var(--signal);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--signal) 14%, transparent);
+}
+
+.portal-scene-guide[data-scene-state='loading'] .portal-scene-indicator {
+  animation: portal-scene-pulse 1.25s ease-in-out infinite alternate;
+}
+
+.portal-scene-guide[data-scene-state='ready'] .portal-scene-indicator {
+  background: var(--st-ready, var(--signal));
+}
+
+.portal-scene-guide[data-scene-state='fallback'] .portal-scene-indicator {
+  background: var(--ink-mute);
+  box-shadow: none;
+}
+
+.portal-form-feedback {
+  min-height: 1.2em;
+  margin: .15rem 0 .35rem;
+  color: var(--ink-mute);
+  font-size: .8rem;
+}
+
+.hero-form [data-track-submit][aria-busy='true'] {
+  cursor: progress;
+  transform: none;
+}
+
+.hero-form .hero-field input:focus-visible,
+.hero-form [data-track-submit]:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--signal) 72%, white);
+  outline-offset: 3px;
+}
+
+@keyframes portal-scene-pulse {
+  to { opacity: .48; transform: scale(.78); }
+}
+
+@media (max-width: 760px) {
+  .hero-art .portal-scene-guide { margin-top: .55rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portal-scene-guide[data-scene-state='loading'] .portal-scene-indicator {
+    animation: none;
+  }
+}

@@ -1,0 +1,217 @@
+/* Acceso del taller — puerta de mostrador.
+   El foco dibuja un trazo ámbar bajo el campo activo. Mientras la API
+   autentica, el botón conserva su etiqueta y muestra un trazo discontinuo
+   de espera. No se simula éxito: el resultado sigue dependiendo de
+   POST /auth/login y el estado deshabilitado se retira al error. */
+
+.page.login-access-page {
+  max-width: 420px;
+  margin-inline: auto;
+}
+
+.login-panel.login-access {
+  position: relative;
+  padding: 1.4rem;
+  transition: border-color 220ms ease, box-shadow 220ms ease;
+}
+
+/* La tarjeta reconoce el campo activo sin competir con el contenido. */
+.login-access:focus-within {
+  border-color: color-mix(in srgb, var(--signal) 44%, var(--line));
+  box-shadow:
+    0 16px 40px rgba(29, 46, 47, .08),
+    0 0 0 1px color-mix(in srgb, var(--signal) 16%, transparent);
+}
+
+/* Trazo de guía: nace en el borde inferior del campo y se dibuja de
+   izquierda a derecha al recibir foco. */
+.login-access > .field {
+  position: relative;
+  margin-bottom: 1.15rem;
+}
+
+.login-access > .field::after {
+  content: '';
+  position: absolute;
+  right: 9px;
+  bottom: 0;
+  left: 9px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(
+    90deg,
+    var(--signal) 0%,
+    color-mix(in srgb, var(--signal) 64%, transparent) 78%,
+    transparent 100%
+  );
+  opacity: 0;
+  transform: scaleX(0);
+  transform-origin: left center;
+  z-index: 1;
+  pointer-events: none;
+  transition: transform 260ms cubic-bezier(.22, .8, .24, 1), opacity 180ms ease;
+}
+
+.login-access > .field:focus-within::after {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+.login-access > .field label {
+  transition: color 160ms ease;
+}
+
+.login-access > .field:focus-within label {
+  color: var(--signal-text);
+}
+
+.login-access input {
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+/* El contorno ámbar sigue siendo el indicador principal; el borde oscuro
+   refuerza el límite del control sobre el fondo marfil. */
+.login-access input:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 1px;
+  border-color: color-mix(in srgb, var(--signal-text) 52%, var(--line-strong));
+  background: color-mix(in srgb, var(--signal) 5%, var(--bg-1));
+}
+
+.login-access__submit {
+  position: relative;
+  justify-content: center;
+  width: 100%;
+  min-height: 46px;
+}
+
+/* Indicador de espera: un trazo discontinuo, discreto, en el pie del botón. */
+.login-access__submit::after {
+  content: '';
+  position: absolute;
+  right: 16px;
+  bottom: 4px;
+  left: 16px;
+  height: 2px;
+  border-radius: 2px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--signal-ink) 0 9px,
+    transparent 9px 15px
+  );
+  background-size: 30px 2px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease;
+}
+
+/* Sólo durante la petición real de autenticación. La etiqueta no cambia
+   y no se usa verde, marca de verificación ni mensaje de éxito. */
+.login-access__submit.is-auth-pending[disabled] {
+  opacity: .82;
+  cursor: progress;
+  background: color-mix(in srgb, var(--signal) 86%, var(--bg-1));
+}
+
+.login-access__submit.is-auth-pending[disabled]::after {
+  opacity: .5;
+  animation: login-access-wait 1.1s linear infinite;
+}
+
+@keyframes login-access-wait {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 30px 0;
+  }
+}
+
+/* El aviso de error entra con calma; el botón ya recuperó su estado base. */
+.login-access [data-error] .notice {
+  animation: login-access-notice 200ms ease-out both;
+}
+
+@keyframes login-access-notice {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.login-access__submit:focus-visible {
+  outline-color: var(--signal-text);
+  outline-offset: 3px;
+}
+
+@media (max-width: 520px) {
+  .page.login-access-page {
+    padding-inline: 1.05rem;
+  }
+
+  .login-panel.login-access {
+    padding: 1.15rem;
+  }
+
+  .login-access > .field {
+    margin-bottom: 1.05rem;
+  }
+
+  .login-access > .field::after {
+    right: 7px;
+    left: 7px;
+  }
+
+  .login-access input {
+    min-height: 44px;
+    font-size: 1rem;
+  }
+
+  .login-access__submit {
+    min-height: 48px;
+    font-size: 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-panel.login-access,
+  .login-access > .field label,
+  .login-access input,
+  .login-access > .field::after,
+  .login-access .login-access__submit,
+  .login-access .login-access__submit::after {
+    transition: none;
+  }
+
+  .login-access__submit.is-auth-pending[disabled]::after {
+    animation: none;
+    opacity: .55;
+  }
+
+  .login-access [data-error] .notice {
+    animation: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .login-access > .field::after {
+    background: Highlight;
+  }
+
+  .login-access__submit.is-auth-pending[disabled] {
+    border-color: ButtonText;
+  }
+
+  .login-access__submit.is-auth-pending[disabled]::after {
+    background-image: repeating-linear-gradient(
+      90deg,
+      ButtonText 0 9px,
+      transparent 9px 15px
+    );
+    opacity: 1;
+  }
+}

@@ -1,0 +1,282 @@
+/* Relevo — microinteracciones globales. Importar después de app.css.
+   Feedback discreto, sin animar superficies de datos en bloque. */
+
+:where(.btn, .topnav-link, .rail-link, a:not(.btn):not(.brand),
+  input, select, textarea, .pill, tbody tr.clickable) {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Acciones: el ámbar conserva el texto carbón definido por btn-primary. */
+.btn {
+  transition: transform 140ms ease, background-color 140ms ease,
+    border-color 140ms ease, color 140ms ease, opacity 140ms ease;
+}
+.btn:hover:not([disabled]) { transform: translateY(-1px); }
+.btn:active:not([disabled]) { transform: translateY(0) scale(.985); }
+.btn:focus-visible,
+.topnav-link:focus-visible,
+.rail-link:focus-visible,
+a:not(.btn):not(.brand):focus-visible,
+tbody tr.clickable:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px var(--signal);
+}
+a:hover,
+.topnav-link:hover { color: var(--signal-text); }
+
+/* Navegación: señal de posición y respuesta breve al hover/press. */
+.topnav-link,
+.rail-link {
+  transition: color 140ms ease, background-color 140ms ease,
+    border-color 140ms ease, transform 140ms ease;
+}
+.topnav-link:hover,
+.rail-link:hover { transform: translateY(-1px); }
+.topnav-link:active,
+.rail-link:active { transform: translateY(0); }
+.topnav-link[aria-current='page'] { border-bottom-color: var(--signal); }
+
+/* Campos: foco visible también al tabular; el realce no desplaza el layout. */
+input, select, textarea {
+  transition: border-color 140ms ease, background-color 140ms ease,
+    box-shadow 140ms ease;
+}
+input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+  border-color: var(--signal);
+  box-shadow: 0 0 0 5px var(--signal);
+}
+
+/* Superficies: .panel cubre formularios, editor panels y resúmenes;
+   .stat cubre las métricas del dashboard. Elevación mínima, sin sombra. */
+.panel {
+  transition: border-color 160ms ease, transform 160ms ease;
+}
+.panel:hover {
+  border-color: color-mix(in srgb, var(--signal) 42%, var(--line));
+  transform: translateY(-1px);
+}
+.stat {
+  border-radius: var(--r-sm);
+  transition: background-color 140ms ease, transform 140ms ease;
+}
+.stat:hover {
+  background-color: color-mix(in srgb, var(--bg-1) 72%, transparent);
+  transform: translateY(-1px);
+}
+.pill { transition: opacity 140ms ease; }
+.pill:hover { opacity: .86; }
+
+/* Recepción: guía visual breve para vincular cliente, equipo y diagnóstico. */
+.intake-workflow {
+  max-width: 640px;
+  margin: 0 0 .8rem;
+  padding: .9rem 1rem .75rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: linear-gradient(115deg, color-mix(in srgb, var(--signal) 8%, var(--bg-1)), var(--bg-1) 72%);
+  overflow: hidden;
+}
+.intake-workflow__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  color: var(--ink-mute);
+  font: 600 .68rem/1.2 var(--font-mono, monospace);
+  letter-spacing: .09em;
+}
+.intake-workflow__head b { color: var(--signal-text); font-size: .75rem; }
+.intake-rail {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .5rem;
+  margin: .8rem 0 .45rem;
+  padding: 0;
+  list-style: none;
+}
+.intake-rail li {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: .45rem;
+  color: var(--ink-mute);
+  font-size: .8rem;
+  transition: color 180ms ease, transform 180ms ease;
+}
+.intake-rail li i {
+  display: grid;
+  width: 1.65rem;
+  height: 1.65rem;
+  flex: 0 0 1.65rem;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--bg-1);
+  color: var(--ink-mute);
+  font: 600 .65rem/1 var(--font-mono, monospace);
+  font-style: normal;
+  transition: border-color 180ms ease, background-color 180ms ease, color 180ms ease, box-shadow 180ms ease;
+}
+.intake-rail li.is-current { color: var(--ink); }
+.intake-rail li.is-current i {
+  border-color: var(--signal);
+  background: var(--signal);
+  color: var(--signal-ink, var(--ink));
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--signal) 18%, transparent);
+}
+.intake-rail li.is-complete i {
+  border-color: var(--st-ready, var(--signal));
+  background: color-mix(in srgb, var(--st-ready, var(--signal)) 18%, var(--bg-1));
+  color: var(--st-ready, var(--signal-text));
+  font-size: 0;
+}
+.intake-rail li.is-complete i::before { content: '✓'; font: 700 .75rem/1 sans-serif; }
+.intake-meter { height: 3px; overflow: hidden; border-radius: 999px; background: var(--line); }
+.intake-meter span {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--signal), var(--st-ready, var(--signal)));
+}
+.intake-workflow__hint { margin: .55rem 0 0; color: var(--ink-mute); font-size: .78rem; }
+.intake-form .field {
+  margin-left: -.55rem;
+  padding: .35rem .55rem;
+  border-left: 2px solid transparent;
+  border-radius: 0 8px 8px 0;
+  transition: border-color 180ms ease, background-color 180ms ease, transform 180ms ease;
+}
+.intake-form .field.is-current {
+  border-left-color: var(--signal);
+  background: color-mix(in srgb, var(--signal) 7%, transparent);
+}
+.intake-form .field.is-complete label { color: var(--st-ready, var(--ink-mute)); }
+.intake-form[aria-busy='true'] { pointer-events: none; }
+
+/* Filtros/listas: data-search existe en casos, clientes y equipos.
+   Los select son filtros; aria-pressed/aria-selected cubren tabs si se añaden. */
+[data-search] > input,
+[data-search] > select { transition: border-color 140ms ease, background-color 140ms ease; }
+[aria-pressed='true'], [aria-selected='true'] {
+  border-color: var(--signal);
+  color: var(--ink);
+  background-color: color-mix(in srgb, var(--signal) 20%, var(--bg-1));
+}
+
+/* Validación nativa y estados disabled sin depender de clases JS. */
+:is(input, select, textarea):user-invalid {
+  border-color: var(--st-cancelled);
+}
+:is(input, select, textarea):user-invalid:focus-visible {
+  outline-color: var(--st-cancelled);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--st-cancelled) 18%, transparent);
+}
+:is(input, select, textarea):disabled,
+.btn:disabled,
+.btn[aria-disabled='true'] {
+  opacity: .58;
+  cursor: not-allowed;
+}
+[aria-busy='true'] { cursor: progress; }
+
+/* Entrada breve de ruta: la jerarquía aparece con continuidad sin bloquear
+   los controles ni animar en bloque cada dato de la vista. */
+.view-enter {
+  transform-origin: top center;
+  animation: relevo-view-enter 260ms cubic-bezier(.18, .72, .24, 1) both;
+}
+
+/* Cambio de estación: adornos temporales por encima del stage, sin capturar
+   interacción ni participar en el árbol accesible. */
+.route-station-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  overflow: hidden;
+  pointer-events: none;
+}
+.route-station-overlay__svg { width: 100%; height: 100%; overflow: visible; }
+.route-station-overlay__corner,
+.route-station-overlay__trace {
+  fill: none;
+  stroke: var(--signal);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+.route-station-overlay__corner { opacity: .74; }
+.route-station-overlay__trace { stroke-width: 2; opacity: .9; }
+.route-station-cursor {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: var(--signal);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--signal) 23%, transparent);
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+@keyframes relevo-view-enter {
+  from { opacity: 0; transform: translate3d(0, 8px, 0) scale(.997); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+/* Tablas: únicamente filas explícitamente navegables reciben feedback. */
+tbody tr.clickable {
+  transition: background-color 140ms ease, color 140ms ease;
+}
+tbody tr.clickable:hover { background-color: var(--bg-2); }
+tbody tr.clickable:active { color: var(--signal-text); }
+
+/* Utilidades opcionales para que la vista indique carga/guardado sin JS supuesto:
+   añadir .is-loading al botón y .is-saving al formulario durante la operación.
+   El texto accesible/estado debe seguir siendo gestionado por la vista. */
+.btn.is-loading,
+.btn.is-saving {
+  opacity: .72;
+  cursor: progress;
+  pointer-events: none;
+}
+.btn.is-loading::before,
+.btn.is-saving::before {
+  content: '';
+  width: .8em;
+  height: .8em;
+  flex: 0 0 .8em;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: relevo-spin 700ms linear infinite;
+}
+.is-saving :is(input, select, textarea) { opacity: .72; }
+@keyframes relevo-spin { to { transform: rotate(1turn); } }
+
+@media (hover: none) {
+  .btn:hover:not([disabled]),
+  .topnav-link:hover,
+  .rail-link:hover { transform: none; }
+  .panel:hover { border-color: var(--line); transform: none; }
+  .stat:hover { background-color: transparent; transform: none; }
+  .pill:hover { opacity: 1; }
+}
+
+@media (max-width: 600px) {
+  .btn { min-height: 44px; }
+  .topnav-link, .rail-link { min-height: 40px; }
+  tbody tr.clickable:active { background-color: var(--bg-2); }
+  .intake-workflow { padding: .8rem .75rem .7rem; }
+  .intake-rail { gap: .25rem; }
+  .intake-rail li { flex-direction: column; align-items: flex-start; gap: .3rem; font-size: .72rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

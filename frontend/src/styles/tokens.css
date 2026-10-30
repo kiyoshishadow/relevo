@@ -1,0 +1,48 @@
+/* Relevo — tokens de identidad «banco de servicio» */
+:root {
+  /* Base clara de banco de reparación; petróleo queda para acentos. */
+  --bg-0: #f4f1e8;
+  --bg-1: #fffdf7;
+  --bg-2: #e7e9e2;
+  --line: rgba(30, 47, 48, 0.13);
+  --line-strong: rgba(30, 47, 48, 0.27);
+
+  /* Texto carbón y gris pizarra para contraste sobre marfil */
+  --ink: #1c2829;
+  --ink-soft: #45595a;
+  --ink-mute: #5e6f70;
+
+  /* Señal de taller: ámbar único y protagonista */
+  --signal: #e7b94a;
+  --signal-press: #f5cd74;
+  --signal-ink: #29230f;
+  --signal-text: #765300;
+
+  /* Estados (siempre acompañados de texto) */
+  --st-cancelled: #d96a5c;
+  --st-cancelled-text: #a74339;
+  --st-review: #78528a;
+  --st-ready: #247565;
+  --st-info: #426989;
+
+  /* Tipografía */
+  --font-body: 'Archivo Variable', 'Archivo', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  /* Ritmo */
+  --r-lg: 14px;
+  --r-sm: 8px;
+  --w-narrow: 64ch;
+
+  --dur-ui: 160ms;
+  --dur-panel: 260ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001s !important;
+    transition-duration: 0.001s !important;
+  }
+}

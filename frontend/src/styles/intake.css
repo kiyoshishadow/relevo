@@ -1,0 +1,32 @@
+.intake-page .intake-workflow, .intake-page .intake-form, .intake-page .intake-catalogs { width:100%; max-width:640px; box-sizing:border-box; }
+.intake-page .intake-catalogs { margin:0 0 1rem; }
+.intake-page .intake-catalogs p { margin:.3rem 0; overflow-wrap:anywhere; }
+.intake-page .intake-catalogs__actions { display:flex; flex-wrap:wrap; gap:.5rem 1rem; align-items:center; margin-top:.7rem; }
+.intake-page .intake-catalogs__actions a { text-decoration:underline; text-underline-offset:3px; }
+.intake-page .intake-field-error { margin:.4rem 0 0; color:var(--st-cancelled-text); font-size:.85rem; line-height:1.45; }
+.intake-page [aria-invalid='true'] { border-color:var(--st-cancelled); box-shadow:0 0 0 1px var(--st-cancelled); }
+.intake-page .intake-form .field.intake-error-pulse { border-radius:10px; will-change:transform,box-shadow; }
+.intake-page .intake-validation { margin:0 0 1rem; }
+.intake-page .intake-meter span { width:100%; transform:scaleX(0); transform-origin:left center; }
+.intake-page .intake-rail li span { overflow-wrap:anywhere; }
+.intake-page .intake-form[aria-busy='true'] { opacity:.8; }
+.intake-device-preview { display:grid; grid-template-columns:minmax(180px, .85fr) minmax(0, 1fr); gap:1.1rem; align-items:center; padding:1rem; margin:.1rem 0 1rem; border:1px solid var(--border, #ddd9ce); border-radius:16px; background:linear-gradient(135deg, #fffdf8, #f3f0e8); }
+.intake-device-preview__scene { min-width:0; }
+.intake-device-preview__stage { min-height:245px; height:245px; overflow:hidden; }
+.intake-device-preview__stage .phone-fallback-inner { height:220px; }
+.intake-device-preview__stage .phone-svg { height:100%; width:auto; max-width:100%; }
+.intake-device-preview__details { min-width:0; }
+.intake-device-preview__details h2 { margin:.25rem 0 .8rem; font-size:1.15rem; overflow-wrap:anywhere; }
+.intake-device-preview__details .device-lab-status { margin:.5rem 0 0; }
+@media (max-width:480px) {
+  .intake-device-preview { grid-template-columns:1fr; gap:.4rem; }
+  .intake-device-preview__stage { min-height:215px; height:215px; }
+  .intake-device-preview__stage .phone-fallback-inner { height:195px; }
+  .intake-page .intake-rail { gap:.5rem; }
+  .intake-page .intake-rail li { align-items:flex-start; }
+  .intake-page .intake-catalogs__actions { align-items:stretch; flex-direction:column; }
+  .intake-page .intake-catalogs__actions .btn { justify-content:center; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .intake-page .intake-workflow *, .intake-page .intake-form .field { transition:none!important; }
+}

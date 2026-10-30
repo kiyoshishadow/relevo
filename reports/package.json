@@ -1,0 +1,19 @@
+{
+  "name": "relevo-reports",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Módulo de reportes y exportación (PDF/XLSX) del sistema Relevo (Equipo 02). REPORT-01",
+  "type": "module",
+  "main": "index.js",
+  "engines": {
+    "node": ">=20.11"
+  },
+  "scripts": {
+    "test": "node --test \"test/**/*.test.js\""
+  },
+  "dependencies": {
+    "exceljs": "^4.4.0",
+    "express": "^5.1.0",
+    "pdfkit": "^0.17.1"
+  }
+}

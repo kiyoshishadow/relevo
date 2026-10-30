@@ -1,0 +1,207 @@
+/* Coberturas: vista previa inmediata de la política de reemplazo.
+   Continúa = la cobertura existente sigue; nueva = se abre otra con el mismo
+   plan y plazo. El SVG es decorativo; el texto visible es la fuente de verdad. */
+.coverage-policy {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(230px, 310px) minmax(0, 1fr);
+  align-items: center;
+  gap: .9rem 1.4rem;
+  margin: .2rem 0 1.1rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--line, rgba(30, 47, 48, .13));
+  border-left: 3px solid var(--policy-accent, var(--st-ready, #247565));
+  border-radius: var(--r-lg, 14px);
+  background: var(--bg-1, #fffdf7);
+  transition: border-left-color 200ms ease;
+}
+.coverage-policy[data-policy='continue'] { --policy-accent: var(--st-ready, #247565); }
+.coverage-policy[data-policy='new'] { --policy-accent: var(--st-info, #426989); }
+
+.coverage-policy-figure {
+  position: relative;
+  margin: 0;
+  padding: .45rem .4rem;
+  border: 1px solid var(--line, rgba(30, 47, 48, .13));
+  border-radius: 10px;
+  overflow: hidden;
+  isolation: isolate;
+  background: radial-gradient(ellipse at 34% 46%, #ffffff 0%, #f4f1e7 82%);
+}
+/* Rejilla de banco, muy tenue, para situar el esquema sin competir con el texto. */
+.coverage-policy-figure::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(105, 129, 122, .08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(105, 129, 122, .08) 1px, transparent 1px);
+  background-size: 24px 24px;
+  mask-image: radial-gradient(ellipse at 42% 50%, #000 30%, transparent 78%);
+  pointer-events: none;
+}
+.coverage-policy-svg { position: relative; display: block; width: 100%; height: auto; }
+
+/* Piezas del esquema */
+.coverage-policy .cp-phone-shell {
+  fill: var(--bg-1, #fffdf7);
+  stroke: var(--line-strong, rgba(30, 47, 48, .27));
+  stroke-width: 1.4;
+}
+.coverage-policy .cp-phone-screen { fill: #173a3d; }
+.coverage-policy .cp-phone-detail { fill: #a3b4af; }
+.coverage-policy .cp-rail,
+.coverage-policy .cp-connector-line {
+  fill: none;
+  stroke: #93a6a0;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+.coverage-policy .cp-label {
+  fill: var(--ink-mute, #5e6f70);
+  font-size: 8.5px;
+  font-weight: 600;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+.coverage-policy .cp-token-card {
+  fill: var(--bg-1, #fffdf7);
+  stroke: var(--line-strong, rgba(30, 47, 48, .27));
+  stroke-width: 1.4;
+  transition: stroke 220ms ease;
+}
+.coverage-policy .cp-bars rect {
+  fill: var(--ink-mute, #5e6f70);
+  opacity: .45;
+  transition: fill 220ms ease, opacity 220ms ease;
+}
+.coverage-policy .cp-token--b .cp-label { fill: var(--st-info, #426989); }
+.coverage-policy .cp-token--b .cp-token-card { stroke: var(--st-info, #426989); }
+.coverage-policy .cp-token--b .cp-bars rect { fill: var(--st-info, #426989); opacity: .8; }
+
+/* Bucle de continuidad: se dibuja una sola vez al elegir «continuar». */
+.coverage-policy .cp-loop {
+  fill: none;
+  stroke: var(--st-ready, #247565);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-dasharray: 1 1;
+  stroke-dashoffset: 1;
+  opacity: 0;
+  transition: stroke-dashoffset 480ms ease, opacity 200ms ease;
+}
+.coverage-policy .cp-seal { opacity: 0; transform: scale(.6); transform-box: fill-box; transform-origin: center; transition: opacity 200ms ease, transform 240ms cubic-bezier(.2, .8, .3, 1); }
+.coverage-policy .cp-seal circle { fill: var(--st-ready, #247565); }
+.coverage-policy .cp-seal path { fill: none; stroke: #fffdf7; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.coverage-policy .cp-token--a .cp-label { transition: fill 220ms ease; }
+
+/* Estado: continuar la cobertura existente. */
+.coverage-policy[data-policy='continue'] .cp-token--a .cp-token-card { stroke: var(--st-ready, #247565); }
+.coverage-policy[data-policy='continue'] .cp-token--a .cp-label { fill: var(--st-ready, #247565); }
+.coverage-policy[data-policy='continue'] .cp-token--a .cp-bars rect { fill: var(--st-ready, #247565); opacity: .75; }
+.coverage-policy[data-policy='continue'] .cp-loop { stroke-dashoffset: 0; opacity: .9; }
+.coverage-policy[data-policy='continue'] .cp-seal { opacity: 1; transform: scale(1); }
+.coverage-policy[data-policy='continue'] .cp-token--b,
+.coverage-policy[data-policy='continue'] .cp-connector { opacity: 0; }
+
+/* Estado: nueva cobertura con el mismo plan y plazo (mismas barras). */
+.coverage-policy .cp-token--b,
+.coverage-policy .cp-connector {
+  opacity: 0;
+  transition: opacity 220ms ease, transform 260ms cubic-bezier(.2, .8, .3, 1);
+}
+.coverage-policy .cp-token--b { transform: translateX(-8px) scale(.97); transform-box: fill-box; transform-origin: center; }
+.coverage-policy[data-policy='new'] .cp-token--b,
+.coverage-policy[data-policy='new'] .cp-connector { opacity: 1; }
+.coverage-policy[data-policy='new'] .cp-token--b { transform: none; }
+.coverage-policy[data-policy='new'] .cp-loop { opacity: 0; }
+
+/* Texto visible; el cuerpo es la región viva que anuncia el cambio. */
+.coverage-policy-copy { min-width: 0; }
+.coverage-policy-kicker {
+  margin: 0 0 .25rem;
+  color: var(--ink-mute, #5e6f70);
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+.coverage-policy-title {
+  margin: 0 0 .35rem;
+  color: var(--ink, #1c2829);
+  font-size: clamp(1.02rem, 1.5vw, 1.2rem);
+  line-height: 1.22;
+  letter-spacing: -.02em;
+}
+.coverage-policy-body {
+  margin: 0;
+  max-width: 46ch;
+  color: var(--ink-soft, #45595a);
+  font-size: .9rem;
+}
+.coverage-policy-note {
+  margin: .55rem 0 0;
+  max-width: 46ch;
+  color: var(--ink-mute, #5e6f70);
+  font-size: .76rem;
+}
+
+/* Hoja decorativa del editor. El panel y sus controles permanecen inmediatos. */
+.access-plans .access-editor { animation: none; }
+.coverage-policy-tab {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  width: max-content;
+  max-width: 100%;
+  margin: -.45rem 0 1rem auto;
+  padding: .55rem .9rem .58rem .7rem;
+  border: 1px solid rgba(126, 101, 54, .28);
+  border-radius: 8px 8px 3px 8px;
+  background: linear-gradient(145deg, #fff8e7, #f3e5c4);
+  box-shadow: 0 3px 9px rgba(72, 55, 23, .1), inset 0 1px rgba(255, 255, 255, .8);
+  color: #665431;
+  transform-origin: top center;
+  pointer-events: none;
+}
+.coverage-policy-tab-mark {
+  display: grid;
+  width: 1.7rem;
+  height: 1.7rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid rgba(126, 101, 54, .22);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .48);
+  font-size: 1.05rem;
+}
+.coverage-policy-tab strong,
+.coverage-policy-tab small { display: block; line-height: 1.2; }
+.coverage-policy-tab strong { font-size: .76rem; letter-spacing: .04em; text-transform: uppercase; }
+.coverage-policy-tab small { margin-top: .12rem; color: #80704f; font-size: .66rem; }
+
+@media (max-width: 760px) {
+  .coverage-policy {
+    grid-template-columns: minmax(0, 1fr);
+    gap: .8rem;
+    padding: .85rem;
+  }
+  .coverage-policy-figure { max-width: 340px; }
+  .coverage-policy-tab { margin: -.3rem 0 .8rem auto; padding: .48rem .75rem .5rem .58rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .coverage-policy-tab { transition: none !important; animation: none !important; }
+  .coverage-policy,
+  .coverage-policy .cp-token-card,
+  .coverage-policy .cp-bars rect,
+  .coverage-policy .cp-loop,
+  .coverage-policy .cp-seal,
+  .coverage-policy .cp-token--b,
+  .coverage-policy .cp-connector {
+    transition: none !important;
+    animation: none !important;
+  }
+  .coverage-policy .cp-token--b { transform: none; }
+  .coverage-policy[data-policy='continue'] .cp-loop { stroke-dashoffset: 0; }
+}

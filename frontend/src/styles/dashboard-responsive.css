@@ -1,0 +1,26 @@
+/* The sidebar leaves less space than the viewport suggests. */
+.recent-cases { container: recent-cases / inline-size; min-width: 0; }
+.recent-cases-table { table-layout: fixed; }
+.recent-cases-table :is(th, td) { white-space: normal; overflow-wrap: anywhere; vertical-align: top; }
+.recent-cases-table th:nth-child(1) { width: 22%; }
+.recent-cases-table th:nth-child(3) { width: 23%; }
+.recent-cases-table .pill { white-space: normal; }
+.recent-case-label { display: none; }
+.recent-case-number a { display: inline-flex; align-items: center; min-height: 2.75rem; text-decoration: underline; text-underline-offset: .2em; }
+.recent-cases-table tr:focus-within { background: var(--bg-1); }
+.recent-cases-empty td { color: var(--ink-mute); }
+
+@container recent-cases (max-width: 60rem) {
+  .recent-cases-wrap { overflow: visible; border: 0; border-radius: 0; }
+  .recent-cases-table, .recent-cases-table tbody { display: block; width: 100%; }
+  /* Keep column names available to assistive technology in card layout. */
+  .recent-cases-table thead { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .recent-cases-table tbody { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); gap: .9rem; }
+  .recent-cases-table tr { display: grid; grid-template-columns: minmax(0, 1fr); align-content: start; gap: .6rem; min-width: 0; padding: 1rem; border: 1px solid var(--line-strong); border-top: 3px solid var(--signal); border-radius: var(--r-lg); background: var(--bg-1); }
+  .recent-cases-table tr.clickable:hover, .recent-cases-table tr:focus-within { background: var(--bg-2); }
+  .recent-cases-table td { display: grid; gap: .15rem; min-width: 0; padding: 0; border: 0; }
+  .recent-case-label { display: block; font-size: .76rem; font-family: var(--font-body); font-weight: 500; color: var(--ink-mute); }
+  .recent-cases-table .recent-case-number { border-bottom: 1px solid var(--line); padding-bottom: .5rem; }
+  .recent-case-terminal > span:last-child { font-weight: 600; }
+  .recent-cases-table .pill { max-width: 100%; }
+}

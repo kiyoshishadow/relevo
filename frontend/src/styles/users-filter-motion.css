@@ -1,0 +1,221 @@
+/* Usuarios — filtro por rol sobre la lista ya consultada (sin nuevas peticiones). */
+.users-filter {
+  min-width: 0;
+  margin: 0 0 1.1rem;
+  padding: 0;
+  border: 0;
+}
+
+.users-filter legend {
+  margin: 0 0 .5rem;
+  padding: 0;
+  color: var(--ink-mute, #5e6f70);
+  font-size: .72rem;
+  font-weight: 650;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.users-filter-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+}
+
+.users-filter-option {
+  position: relative;
+  display: inline-flex;
+  min-width: 0;
+}
+
+/* Radio real y enfocable; el chip es su representación visual. */
+.users-filter-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.users-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  min-height: 38px;
+  padding: .38rem .8rem;
+  border: 1px solid var(--line, #d9dfdb);
+  border-radius: 999px;
+  background: var(--paper, #fffef9);
+  color: var(--ink-soft, #45595a);
+  font-size: .86rem;
+  font-weight: 560;
+  line-height: 1.2;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-ui, 160ms) ease,
+    border-color var(--dur-ui, 160ms) ease,
+    color var(--dur-ui, 160ms) ease,
+    box-shadow var(--dur-ui, 160ms) ease;
+}
+
+.users-filter-option:hover .users-filter-chip {
+  border-color: var(--line-strong, rgba(30, 47, 48, .27));
+  color: var(--ink, #1c2829);
+}
+
+.users-filter-input:checked + .users-filter-chip {
+  border-color: color-mix(in srgb, var(--signal, #e7b94a) 68%, var(--ink, #1c2829));
+  background: var(--signal, #e7b94a);
+  color: var(--signal-ink, #29230f);
+  box-shadow: 0 8px 18px -14px rgba(30, 47, 48, .6);
+}
+
+.users-filter-input:focus-visible + .users-filter-chip {
+  outline: 3px solid color-mix(in srgb, var(--signal, #e7b94a) 70%, white);
+  outline-offset: 2px;
+}
+
+.users-filter-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.6em;
+  padding: .05em .42em;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink, #1c2829) 8%, transparent);
+  font: 600 .76rem/1.5 var(--font-mono, ui-monospace, monospace);
+  font-variant-numeric: tabular-nums;
+}
+
+.users-filter-input:checked + .users-filter-chip .users-filter-count {
+  background: color-mix(in srgb, var(--signal-ink, #29230f) 15%, transparent);
+}
+
+.users-filter-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.users-scope {
+  max-width: 74ch;
+  margin: .6rem 0 0;
+  color: var(--ink-mute, #5e6f70);
+  font-size: .8rem;
+}
+
+.users-filter-status {
+  margin: .35rem 0 0;
+  color: var(--ink-soft, #45595a);
+  font-size: .82rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.users-range-index {
+  display: inline-flex;
+  width: clamp(3.5rem, 12vw, 7rem);
+  margin-inline-start: .55rem;
+  vertical-align: middle;
+}
+
+.users-range-index > span {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 5px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink-mute) 28%, transparent);
+}
+
+.users-range-index > span::before {
+  position: absolute;
+  inset: 2px 0 auto;
+  height: 1px;
+  background: color-mix(in srgb, var(--ink-mute) 55%, transparent);
+  content: '';
+}
+
+.users-range-index [data-users-range-needle] {
+  position: absolute;
+  top: -2px;
+  left: 0;
+  width: 5px;
+  height: 9px;
+  border-radius: 2px;
+  background: var(--amber, #e9a93a);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--amber, #e9a93a) 18%, transparent);
+  will-change: transform;
+}
+
+.users-filter-empty {
+  margin: 0;
+  padding: .95rem .3rem;
+  color: var(--ink-mute, #5e6f70);
+}
+
+.users-filter-empty strong {
+  color: var(--ink, #1c2829);
+}
+
+/* Aparición breve de las filas que sí coinciden con el rol elegido. */
+.users-table tbody tr.users-row-enter {
+  animation: users-row-in 180ms cubic-bezier(.22, .61, .36, 1) both;
+  animation-delay: calc(min(var(--users-row-i, 0), 6) * 18ms);
+}
+
+@keyframes users-row-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 760px) {
+  .users-filter-options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .45rem;
+  }
+
+  .users-filter-option {
+    display: flex;
+  }
+
+  .users-filter-chip {
+    justify-content: space-between;
+    width: 100%;
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 380px) {
+  .users-filter-options {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .users-filter-chip {
+    transition: none;
+  }
+
+  .users-table tbody tr.users-row-enter {
+    animation: none;
+    animation-delay: 0s;
+  }
+}

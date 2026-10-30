@@ -1,0 +1,40 @@
+{
+  "name": "relevo-backend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Backend API del sistema de reparación de terminales Relevo (Equipo 02)",
+  "type": "module",
+  "engines": {
+    "node": ">=20.11"
+  },
+  "scripts": {
+    "start": "node server/index.js",
+    "start:local": "node --env-file-if-exists=.env.local server/index.js",
+    "dev": "node --watch server/index.js",
+    "install:all": "npm ci && npm --prefix reports ci && npm --prefix frontend ci",
+    "reports:install": "npm --prefix reports ci",
+    "frontend:install": "npm --prefix frontend ci",
+    "build": "npm run frontend:build",
+    "frontend:build": "npm --prefix frontend run build",
+    "db:migrate": "node scripts/db-migrate.js",
+    "db:seed": "node scripts/db-seed.js",
+    "db:bootstrap-admin": "node scripts/bootstrap-admin.js",
+    "db:setup": "node scripts/db-setup.js",
+    "notifications:drain": "node scripts/notifications-drain.js",
+    "verify:reports": "node scripts/verify-reports.js",
+    "test": "node --test server/test/domain.test.js",
+    "test:unit": "node --test server/test/domain.test.js",
+    "test:integration": "node --test server/test/api.test.js",
+    "test:integrated": "node --test server/test/integration.test.js",
+    "test:reports": "npm --prefix reports test",
+    "test:all": "node --test server/test/domain.test.js server/test/api.test.js server/test/integration.test.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.7",
+    "express": "^5.1.0",
+    "nodemailer": "^7.0.6",
+    "pg": "^8.16.3",
+    "zod": "^4.1.12"
+  }
+}

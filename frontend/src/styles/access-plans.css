@@ -1,0 +1,57 @@
+.access-plans { --access-accent: var(--gold, #b5872e); }
+.access-plans .access-plans-heading { display:flex; justify-content:space-between; align-items:center; gap:1.5rem; margin-bottom:1.6rem; }
+.access-plans-heading h1 { margin-bottom:.35rem; }
+.access-plans-heading p, .access-editor-context { color:var(--ink-mute); margin:.3rem 0 1rem; max-width:64ch; }
+.access-plans-heading .btn { flex-shrink:0; }
+.access-roster { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); border:1px solid var(--line, #d9dfdb); background:var(--paper, #fffef9); border-radius:18px; overflow:hidden; margin-bottom:1.5rem; }
+.access-role { display:flex; align-items:center; gap:.9rem; padding:1.2rem; min-width:0; }
+.access-role + .access-role { border-left:1px solid var(--line, #d9dfdb); }
+.access-role h2 { font-size:1rem; margin:0 0 .3rem; }
+.access-role p { margin:0; color:var(--ink-mute); font-size:.85rem; }
+.access-role strong { color:var(--ink); font-size:1.15rem; }
+.access-role-glyph { display:grid; place-items:center; width:2.6rem; height:2.9rem; border:1px solid var(--line, #d9dfdb); border-radius:10px; color:var(--access-accent); background:#fbf7ed; font-size:1.6rem; flex-shrink:0; }
+.access-plans .access-editor { border-left:3px solid var(--access-accent); padding:1.4rem; margin:1.3rem 0; animation:access-editor-open .26s ease-out both; }
+.access-editor h2 { margin-top:0; }
+.access-plans .access-row-selected { background:#fbf2da; box-shadow:inset 3px 0 var(--access-accent); }
+.access-plans table td { vertical-align:middle; }
+.access-plans .access-plan-name { font-weight:650; display:block; }
+.access-plans .access-plan-status { display:inline-flex; font-size:.78rem; color:var(--ink-mute); margin-top:.25rem; }
+.access-plans .access-duration { display:inline-flex; align-items:baseline; gap:.35rem; }
+.access-duration strong { font-size:1.2rem; font-variant-numeric:tabular-nums; }
+.access-plans .access-form-status { grid-column:1/-1; margin:0; color:var(--ink-mute); }
+.access-plans .access-form-actions { grid-column:1/-1; }
+.access-plans [data-form][aria-busy="true"] { cursor:progress; }
+.access-plans :is(input,select,textarea):focus-visible { outline:2px solid var(--access-accent); outline-offset:3px; }
+.access-plans [data-edit] { transition:background-color .16s, color .16s; }
+.access-plans .coverage-table table { table-layout:fixed; min-width:660px; }
+.access-plans .coverage-table :is(th,td) { white-space:normal; overflow-wrap:anywhere; padding:.75rem .65rem; }
+.coverage-name-col { width:25%; }
+.coverage-brand-col { width:12%; }
+.coverage-plan-col { width:19%; }
+.coverage-months-col { width:13%; }
+.coverage-policy-col { width:19%; }
+.coverage-action-col { width:12%; }
+.access-plans .coverage-table .access-duration { flex-wrap:wrap; gap:0 .3rem; }
+.access-plans .coverage-table [data-edit] { padding:.5rem .65rem; }
+.access-plans .coverage-table:focus-visible { outline:2px solid var(--access-accent); outline-offset:4px; }
+.access-plans .coverage-scroll-help { display:none; color:var(--ink-mute); font-size:.85rem; max-width:65ch; margin:1rem 0 .5rem; }
+@keyframes access-editor-open { from { opacity:.35; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+@media(max-width:1100px) {
+ .access-plans .coverage-scroll-help { display:block; }
+ .access-plans .coverage-table { overflow-x:scroll; scrollbar-width:auto; scrollbar-color:var(--access-accent) var(--paper,#fffef9); }
+ .access-plans .coverage-table.mt { margin-top:0; }
+}
+@media(max-width:760px) {
+ .access-plans .access-plans-heading { align-items:flex-start; flex-direction:column; gap:.7rem; }
+ .access-roster { grid-template-columns:1fr; }
+ .access-role + .access-role { border-left:0; border-top:1px solid var(--line,#d9dfdb); }
+ .access-role { padding:.9rem 1rem; }
+ .access-plans .access-editor { padding:1rem; }
+ .access-editor .grid2 { grid-template-columns:minmax(0,1fr); }
+ .access-editor :is(input,select,textarea) { min-width:0; width:100%; }
+ .access-plans .table-wrap { max-width:100%; }
+}
+@media(prefers-reduced-motion:reduce) {
+ .access-plans .access-editor { animation:none; }
+ .access-plans [data-edit] { transition:none; }
+}

@@ -1,0 +1,12 @@
+node_modules/
+dist/
+tmp/
+.env
+.env.*
+!.env.example
+*.log
+orchestration/logs/
+orchestration/runtime/
+output/
+backups/
+.workers/
