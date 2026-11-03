@@ -21,15 +21,17 @@ export function caseBenchModel(cs = {}) {
 export function caseBenchMarkup(cs) {
   const model = caseBenchModel(cs)
   return `<section class="case-bench" data-case-bench data-mode="${model.mode}" aria-labelledby="case-bench-title">
-    <div class="case-bench__stage" aria-hidden="true">
-      <div class="case-bench__orbit"></div><div class="case-bench__orbit case-bench__orbit--inner"></div>
-      <div class="case-bench__assembly">
-        <div class="case-bench__part case-bench__shell"><i></i><i></i></div>
-        <div class="case-bench__part case-bench__board"><i></i><i></i><i></i><span></span></div>
-        <div class="case-bench__part case-bench__screen"><span></span><i></i></div>
-      </div>
-      <div class="case-bench__probe"></div><div class="case-bench__scan"></div>
-      <span class="case-bench__caption">${esc(model.caption)}</span>
+    <div class="case-bench__stage">
+      <div class="case-bench__orbit" aria-hidden="true"></div><div class="case-bench__orbit case-bench__orbit--inner" aria-hidden="true"></div>
+      <button type="button" class="case-bench__tap-target" data-bench-animate aria-label="Tocar para desplegar las capas esquemáticas del teléfono">
+        <div class="case-bench__assembly" aria-hidden="true">
+          <div class="case-bench__part case-bench__shell"><i></i><i></i></div>
+          <div class="case-bench__part case-bench__board"><i></i><i></i><i></i><span></span></div>
+          <div class="case-bench__part case-bench__screen"><span></span><i></i></div>
+        </div>
+      </button>
+      <div class="case-bench__probe" aria-hidden="true"></div><div class="case-bench__scan" aria-hidden="true"></div>
+      <span class="case-bench__caption" aria-hidden="true">${esc(model.caption)}</span>
     </div>
     <div class="case-bench__readout">
       <p class="case-bench__verified"><span></span>Estado confirmado</p>
@@ -38,9 +40,8 @@ export function caseBenchMarkup(cs) {
       <dl><div><dt>Última actualización</dt><dd>${esc(fmtDate(cs.updated_at))}</dd></div>
       <div><dt>Técnico asignado</dt><dd>${esc(cs.technician?.full_name || 'Sin asignar')}</dd></div></dl>
       ${model.panel ? `<button type="button" class="btn btn-ghost" data-case-jump="${model.panel}">Abrir ${({ diagnosis: 'diagnóstico', quote: 'cotización', payment: 'pagos', actions: 'acciones', transition: 'estado' })[model.panel]}</button>` : ''}
-      <button type="button" class="btn btn-ghost" data-bench-animate aria-describedby="case-bench-animate-hint">Animar despiece</button>
       <button type="button" class="btn btn-primary" data-case-inspector-open aria-expanded="false" aria-controls="case-inspector-${esc(cs.id)}">Inspeccionar equipo</button>
-      <small id="case-bench-animate-hint" data-bench-animate-hint>Reproduce el despiece del esquema sin modificar el caso.</small>
+      <small id="case-bench-animate-hint" data-bench-animate-hint>Toca el teléfono para ver cómo se abren sus capas.</small>
       <small>Vista esquemática de servicio. El estado procede del expediente.</small>
     </div>
   </section>`

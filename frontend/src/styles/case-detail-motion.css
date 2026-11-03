@@ -5,7 +5,10 @@
 .case-bench__stage::before { content:''; position:absolute; inset:0; background-image:linear-gradient(#69817a13 1px,transparent 1px),linear-gradient(90deg,#69817a13 1px,transparent 1px); background-size:28px 28px; mask-image:radial-gradient(ellipse,#000,transparent 75%); }
 .case-bench__orbit { position:absolute; left:16%; top:53%; width:68%; height:37%; border:1px solid #68877f50; border-radius:50%; transform:rotate(-12deg); box-shadow:0 12px 0 -11px #69817a40; }
 .case-bench__orbit--inner { left:24%; width:52%; top:58%; height:25%; border-style:dashed; opacity:.6; }
-.case-bench__assembly { position:absolute; left:50%; top:50%; width:105px; height:195px; transform:translate(-50%,-50%) rotateX(45deg) rotateZ(-28deg); transform-style:preserve-3d; }
+.case-bench__tap-target { position:absolute; z-index:1; left:50%; top:50%; width:105px; height:195px; padding:0; border:0; border-radius:18px; color:inherit; background:transparent; transform:translate(-50%,-50%) rotateX(45deg) rotateZ(-28deg); transform-style:preserve-3d; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+.case-bench__tap-target:hover { filter:drop-shadow(0 10px 10px #1e3e402b); }
+.case-bench__tap-target:focus-visible { outline:3px solid #b47b25; outline-offset:7px; }
+.case-bench__assembly { position:relative; width:100%; height:100%; transform-style:preserve-3d; pointer-events:none; }
 .case-bench__part { position:absolute; inset:0; border-radius:17px; transform-style:preserve-3d; transition:transform 700ms cubic-bezier(.2,.7,.2,1),opacity 300ms; }
 .case-bench__shell { background:linear-gradient(120deg,#c4c8c4,#f7f8ef 45%,#a3aaa4); border:3px solid #8f9d96; box-shadow:0 5px #82918a,0 22px 25px #243d3533; transform:translateZ(-18px); }
 .case-bench__shell i { position:absolute; top:12px; left:11px; width:19px; height:19px; border:3px solid #a5b0aa; border-radius:50%; background:#152f30; box-shadow:inset 0 0 0 3px #426065; }
@@ -28,7 +31,7 @@
 /* Apertura breve al saltar a un panel: GSAP manda en el transform de las capas,
    sin transición CSS compitiendo; la clase vive solo durante el movimiento. */
 .case-bench.is-brief-open .case-bench__part { transition: none; will-change: transform; }
-.case-bench__probe { position:absolute; top:19%; left:72%; width:7px; height:125px; border-radius:5px; background:linear-gradient(90deg,#8f9f96,#fafbf4,#8f9f96); transform:rotate(35deg); box-shadow:0 3px 7px #273f3022; opacity:0; }
+.case-bench__probe { position:absolute; top:19%; left:72%; width:7px; height:125px; border-radius:5px; background:linear-gradient(90deg,#8f9f96,#fafbf4,#8f9f96); transform:rotate(35deg); box-shadow:0 3px 7px #273f3022; opacity:0; pointer-events:none; }
 .case-bench[data-mode='repair'] .case-bench__probe { opacity:1; }
 .case-bench__scan { position:absolute; inset:20% 18% 22%; border-top:1px solid #579384; opacity:0; pointer-events:none; }
 .case-bench__caption { position:absolute; bottom:15px; left:20px; color:#526a63; font-size:.75rem; }

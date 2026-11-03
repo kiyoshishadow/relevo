@@ -520,17 +520,15 @@ export function reframeBench(bench, { reduced, act } = {}) {
   return true
 }
 
-// ---------- Botón Animar despiece en el banco ----------
-/* La apertura breve vive en el banco, fuera de pantalla tras saltar a un panel
-   lejano, así que se ofrece como acción explícita: el botón la ejecuta sin
-   desplazar la página ni cambiar datos. Con movimiento reducido queda
-   deshabilitado con explicación visible y la preferencia se observa al vuelo;
-   cada cableado retira el oyente anterior y `onLeave` libera el vigente. */
+// ---------- Gesto del teléfono para desplegar el esquema ----------
+/* La propia ilustración es el control: ratón, tacto, Enter y Espacio lanzan la
+   misma apertura breve. Movimiento reducido conserva la interacción y explica
+   que la escena queda estática. Cada cableado limpia sus listeners al salir. */
 const benchAnimateBindings = new WeakMap()
 
 export function wireBenchAnimate(main, { matchMedia } = {}) {
   const previous = benchAnimateBindings.get(main)
-  previous?.media?.removeEventListener?.('change', previous.applyPreference)
+  previous?.dispose?.()
   benchAnimateBindings.delete(main)
   const bench = main.querySelector('[data-case-bench]')
   if (!bench?.isConnected) return
@@ -539,23 +537,30 @@ export function wireBenchAnimate(main, { matchMedia } = {}) {
   if (!button || !hint) return
   const media = (matchMedia ?? window.matchMedia.bind(window))('(prefers-reduced-motion: reduce)')
   const applyPreference = () => {
-    button.disabled = media.matches
     hint.textContent = media.matches
-      ? 'Animar despiece no está disponible porque el sistema prefiere movimiento reducido.'
-      : 'Reproduce el despiece del esquema sin modificar el caso.'
-    // Cambiar a movimiento reducido con una apertura en vuelo la cancela y limpia
-    // su inline y su clase, igual que lo haría la salida de la vista.
+      ? 'Toca el teléfono para explorar sus capas; la animación está pausada por la preferencia de movimiento reducido.'
+      : 'Toca el teléfono para ver cómo se abren sus capas.'
     if (media.matches) benchOpenAnimations.get(main)?.stop()
   }
+  const onFocus = () => reframeBench(bench, { reduced: () => media.matches })
+  const onClick = () => animateBenchOpen(main)
   applyPreference()
   media.addEventListener?.('change', applyPreference)
-  benchAnimateBindings.set(main, { media, applyPreference })
-  onLeave(() => media.removeEventListener?.('change', applyPreference))
-  // Tap y Tab concentran el encuadre en el foco: tanto el desplazamiento
-  // nativo del navegador como este reencuadre se resuelven en el frame
-  // siguiente, dejando escena y mando visibles antes de animar.
-  button.addEventListener('focus', () => reframeBench(bench, { reduced: () => media.matches }))
-  button.addEventListener('click', () => animateBenchOpen(main))
+  button.addEventListener('focus', onFocus)
+  button.addEventListener('click', onClick)
+  const binding = {
+    dispose() {
+      media.removeEventListener?.('change', applyPreference)
+      button.removeEventListener('focus', onFocus)
+      button.removeEventListener('click', onClick)
+    },
+  }
+  benchAnimateBindings.set(main, binding)
+  onLeave(() => {
+    if (benchAnimateBindings.get(main) !== binding) return
+    binding.dispose()
+    benchAnimateBindings.delete(main)
+  })
 }
 
 async function renderZones(zone, cs, id, { showPaymentReceipt = false } = {}) {

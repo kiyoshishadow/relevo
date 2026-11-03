@@ -21,10 +21,18 @@ function fakeMatchMedia(initialMatches) {
   return media
 }
 
-// Botón inerte: no invoca GSAP, solo permite comprobar el estado del mando.
+// Control ligero: permite comprobar copy, listeners y acceso por teclado/tacto.
 function fixture({ reducedInitial = false } = {}) {
   const media = fakeMatchMedia(reducedInitial)
-  const button = { disabled: false, addEventListener: () => {} }
+  const listeners = new Map()
+  const button = {
+    disabled: false,
+    addEventListener: (type, fn) => listeners.set(type, fn),
+    removeEventListener: type => listeners.delete(type),
+    click: () => listeners.get('click')?.(),
+    focus: () => listeners.get('focus')?.(),
+    listenerCount: () => listeners.size,
+  }
   const hint = { textContent: '' }
   const bench = { isConnected: true, querySelector: selector => (
     selector === '[data-bench-animate]' ? button :
@@ -34,21 +42,21 @@ function fixture({ reducedInitial = false } = {}) {
   return { media, button, hint, main }
 }
 
-test('con movimiento reducido el botón queda deshabilitado con explicación visible', () => {
+test('con movimiento reducido el teléfono sigue siendo accesible y explica la escena estática', () => {
   const { media, main, button, hint } = fixture({ reducedInitial: true })
   wireBenchAnimate(main, { matchMedia: name => assert.equal(name, '(prefers-reduced-motion: reduce)') || media })
 
-  assert.equal(button.disabled, true)
-  assert.match(hint.textContent, /Animar despiece no está disponible/)
+  assert.equal(button.disabled, false)
+  assert.match(hint.textContent, /Toca el teléfono/)
+  assert.match(hint.textContent, /pausada por la preferencia/)
 })
 
-test('sin movimiento reducido el botón queda habilitado y explica qué hace', () => {
+test('sin movimiento reducido la ilustración invita a tocarla', () => {
   const { media, main, button, hint } = fixture()
   wireBenchAnimate(main, { matchMedia: () => media })
 
   assert.equal(button.disabled, false)
-  assert.match(hint.textContent, /Reproduce el despiece/)
-  assert.match(hint.textContent, /sin modificar el caso/)
+  assert.match(hint.textContent, /Toca el teléfono para ver cómo se abren sus capas/)
 })
 
 test('el cambio dinámico de preferencia actualiza el mando sin recablear', () => {
@@ -57,13 +65,14 @@ test('el cambio dinámico de preferencia actualiza el mando sin recablear', () =
 
   media.matches = true
   media.dispatchChange()
-  assert.equal(button.disabled, true)
-  assert.match(hint.textContent, /no está disponible/)
+  assert.equal(button.disabled, false)
+  assert.match(hint.textContent, /pausada por la preferencia/)
 
   media.matches = false
   media.dispatchChange()
   assert.equal(button.disabled, false)
-  assert.match(hint.textContent, /Reproduce el despiece/)
+  assert.match(hint.textContent, /Toca el teléfono/)
+  assert.equal(button.listenerCount(), 2, 'conserva foco y clic del control ilustrado')
 })
 
 test('repetir el cableado retira el oyente de la preferencia anterior', () => {
@@ -130,8 +139,8 @@ test('cambiar a movimiento reducido con apertura en vuelo la cancela y limpia el
 
     fix.media.matches = true
     fix.media.dispatchChange()
-    assert.equal(fix.button.disabled, true)
-    assert.match(fix.hint.textContent, /no está disponible/)
+    assert.equal(fix.button.disabled, false)
+    assert.match(fix.hint.textContent, /pausada por la preferencia/)
     assert.ok(!fix.bench.classList.contains('is-brief-open'),
       'stop() retiró la clase del vuelo, no se espera al onComplete')
     await new Promise(resolve => setTimeout(resolve, 300))
@@ -150,9 +159,9 @@ test('con movimiento reducido inicial no falla aunque no exista apertura previa'
   try {
     wireBenchAnimate(fix.main, { matchMedia: () => fix.media })
 
-    assert.equal(fix.button.disabled, true)
+    assert.equal(fix.button.disabled, false)
     assert.ok(!fix.bench.classList.contains('is-brief-open'))
-    assert.match(fix.hint.textContent, /no está disponible/)
+    assert.match(fix.hint.textContent, /pausada por la preferencia/)
   } finally {
     fix.restoreWindow()
   }
@@ -169,7 +178,7 @@ test('en vuelo y regresando a no-preferencia el botón sigue disponible sin rest
     fix.media.dispatchChange()
 
     assert.equal(fix.button.disabled, false)
-    assert.match(fix.hint.textContent, /Reproduce el despiece/)
+    assert.match(fix.hint.textContent, /Toca el teléfono/)
     assert.ok(!fix.bench.classList.contains('is-brief-open'),
       'la clase del vuelo cancelado no vuelve a aparecer')
     assert.equal(fix.parts['.case-bench__screen'].z, 70)
