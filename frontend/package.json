@@ -13,6 +13,7 @@
     "@fontsource-variable/archivo": "^5.2.8",
     "@fontsource/ibm-plex-mono": "^5.2.7",
     "gsap": "^3.13.0",
+    "maplibre-gl": "^6.16.0",
     "three": "^0.186.1"
   },
   "devDependencies": {
