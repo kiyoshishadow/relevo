@@ -251,11 +251,12 @@ export async function mountPhone3d(host, button, status, { reduced = false, asse
   // Profiled devices turn from their rear exterior to the schematic front.
   const explodedPose = [
     { x: 0, y: 0, z: -.18, rx: -.025, ry: -.025, rz: -.01 },
-    { x: 1.05, y: .04, z: .52, rx: .055, ry: .035, rz: .035 },
+    // Present the display in front of the chassis and the rear cover.
+    { x: 1.12, y: .16, z: 1.45, rx: .055, ry: .035, rz: .035 },
     { x: -.78, y: -.35, z: .72, rx: -.035, ry: -.02, rz: -.028 },
     { x: -.78, y: .68, z: 1.08, rx: .045, ry: -.035, rz: .025 },
     // Keep the full-height cover clear of the cradle, including its focus scale.
-    { x: .28, y: .35, z: .92, rx: -.02, ry: -.03, rz: .015 },
+    { x: .05, y: .35, z: -.65, rx: -.02, ry: -.03, rz: .015 },
     { x: .93, y: 1.0, z: .86, rx: .025, ry: Math.PI + .045, rz: -.025 },
   ]
   const focusLayer = index => {
