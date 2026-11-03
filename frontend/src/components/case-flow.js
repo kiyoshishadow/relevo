@@ -81,6 +81,7 @@ export function caseFlowMarkup(status, history = [], { interactive = false } = {
   return `<section class="panel case-flow" aria-labelledby="case-flow-title">
     <div class="case-flow__heading"><div><p class="case-flow__eyebrow">SEGUIMIENTO DEL TALLER</p><h2 id="case-flow-title">Recorrido del caso</h2></div>
       <span class="case-flow__count">${recorded.length} ${recorded.length === 1 ? 'movimiento' : 'movimientos'}</span></div>
+    ${interactive ? '<p class="case-flow__hint">Toca cualquier movimiento para inspeccionar esa etapa en el teléfono.</p>' : ''}
     <ol class="case-flow__list" aria-label="Movimientos del caso">
       ${events.map((event, index) => {
         const next = events[index + 1]

@@ -1341,7 +1341,8 @@ export async function getPublicTracking(caseNumber, token) {
     await query(
       `SELECT c.id, c.case_number, c.status, c.created_at, c.updated_at,
               c.diagnosis, c.problem_type, c.diagnosed_at,
-              t.brand, t.model, c.tracking_token_hash
+              t.brand, t.model, t.initial_condition, t.accessories,
+              c.reported_problem, c.tracking_token_hash
          FROM cases c JOIN terminals t ON t.id = c.terminal_id
         WHERE c.case_number = $1`,
       [caseNumber],
@@ -1379,7 +1380,13 @@ export async function getPublicTracking(caseNumber, token) {
     status: row.status,
     received_at: iso(row.created_at),
     updated_at: iso(row.updated_at),
-    terminal: { brand: row.brand, model: row.model },
+    terminal: {
+      brand: row.brand,
+      model: row.model,
+      initial_condition: row.initial_condition,
+      accessories: row.accessories,
+    },
+    reported_problem: row.reported_problem,
     history: history.rows.map((item) => ({
       status: item.to_status,
       at: iso(item.created_at),

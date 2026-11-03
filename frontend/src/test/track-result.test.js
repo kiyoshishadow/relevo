@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { setTrackSceneReady, trackResultHtml } from '../views/track.js'
+import { bindReceiptPrint, setTrackSceneReady, trackResultHtml } from '../views/track.js'
 import { getExteriorYawFromPose, getMovementInspectionPose } from '../components/phone3d.js'
 
 test('public tracking highlights the authoritative current status and recorded history', () => {
@@ -61,6 +61,38 @@ test('public tracking escapes model text in its scene label', () => {
 
   assert.doesNotMatch(html, /<img src=x/)
   assert.match(html, /&lt;img src=x onerror=alert\(1\)&gt;/)
+})
+
+test('public tracking provides an expandable printable receipt with only intake details', () => {
+  const html = trackResultHtml({
+    case_number: 'RV-2026-000001', received_at: '2026-11-01T19:54:00.000Z', status: 'received',
+    reported_problem: 'Se apaga durante el uso',
+    terminal: { brand: 'Samsung', model: 'Galaxy A15', initial_condition: 'Pantalla con marcas leves', accessories: 'Cargador y funda' },
+    history: [{ status: 'received', at: '2026-11-01T19:54:00.000Z' }],
+  })
+  assert.match(html, /<details class="track-receipt"/)
+  assert.match(html, /Comprobante de recepción/)
+  assert.match(html, /RV-2026-000001/)
+  assert.match(html, /Se apaga durante el uso/)
+  assert.match(html, /Pantalla con marcas leves/)
+  assert.match(html, /Cargador y funda/)
+  assert.match(html, /data-track-print/)
+  assert.match(html, /Toca cualquier movimiento/)
+  assert.doesNotMatch(html, /tracking_token|IMEI|<img/)
+})
+
+test('receipt print action opens the disclosure and removes its listener on route leave', () => {
+  const listeners = new Map()
+  const button = { addEventListener: (name, fn) => listeners.set(name, fn), removeEventListener: (name, fn) => { if (listeners.get(name) === fn) listeners.delete(name) } }
+  const receipt = { open: false }
+  const page = { querySelector: selector => selector === '[data-track-print]' ? button : selector === '[data-track-receipt]' ? receipt : null }
+  let prints = 0
+  const dispose = bindReceiptPrint(page, () => { prints += 1 })
+  listeners.get('click')()
+  assert.equal(receipt.open, true)
+  assert.equal(prints, 1)
+  dispose()
+  assert.equal(listeners.size, 0)
 })
 
 test('public tracking does not assign a date to a status absent from history', () => {

@@ -2,7 +2,7 @@
 // La clave viaja por almacenamiento efímero de sesión (no por la URL);
 // al agotarse la credencial, la vista pide los datos de nuevo en formulario.
 import { post } from '../api.js'
-import { esc, fmtMoney, pill } from '../util.js'
+import { esc, fmtDate, fmtMoney, pill } from '../util.js'
 import { publicShell, bindLogout, ensureSessionNav } from '../layout/public.js'
 import { navigate, onLeave } from '../router.js'
 import { field } from '../ui.js'
@@ -71,6 +71,12 @@ export function submitStoredTrackCredential({ storage, notice, values, go }) {
 export function trackResultHtml(data) {
   const terminal = [data.terminal?.brand, data.terminal?.model].filter(Boolean).join(' ')
   const profile = resolveDeviceProfile(data.terminal?.brand, data.terminal?.model)
+  const receiptFields = [
+    ['Equipo recibido', terminal || 'Terminal registrado'],
+    ['Problema indicado', data.reported_problem],
+    ['Condición al ingreso', data.terminal?.initial_condition],
+    ['Accesorios recibidos', data.terminal?.accessories],
+  ].filter(([, value]) => String(value ?? '').trim())
 
   return `
     <div class="track-result">
@@ -81,6 +87,16 @@ export function trackResultHtml(data) {
         </div>
         <p class="track-summary-note">El avance que ves aquí corresponde al historial registrado por el taller.</p>
       </section>
+      <details class="track-receipt" data-track-receipt>
+        <summary><span><strong>Comprobante de recepción</strong><small>Consulta qué equipo y qué reporte quedaron registrados al recibirlo.</small></span><span class="track-receipt__action">Ver comprobante</span></summary>
+        <div class="track-receipt__body">
+          <div class="track-receipt__heading"><div><span>RELEVO · RECEPCIÓN</span><h2>Ficha de ingreso</h2></div><div class="track-receipt__number"><small>NÚMERO DE CASO</small><strong>${esc(data.case_number || '—')}</strong></div></div>
+          <p class="track-receipt__date">Recibido el ${esc(fmtDate(data.received_at))}</p>
+          <dl>${receiptFields.map(([label, value]) => `<div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join('')}</dl>
+          <p class="track-receipt__note">Esta ficha refleja la información registrada al recibir el equipo. No sustituye el comprobante físico firmado.</p>
+          <button class="btn btn-ghost" type="button" data-track-print>Imprimir comprobante</button>
+        </div>
+      </details>
       <section class="track-device-view" aria-label="Vista interactiva del equipo">
         <div class="device-lab-stage track-device-view__scene" data-track-device-stage>
           <div class="device-stage-orbit" aria-hidden="true"><i></i><i></i><i></i></div>
@@ -105,7 +121,7 @@ export function trackResultHtml(data) {
       ${data.diagnosis ? `
       <section class="panel">
         <h2>Diagnóstico</h2>
-        <p>${esc(data.diagnosis)}</p>
+        <p>${esc(typeof data.diagnosis === 'string' ? data.diagnosis : data.diagnosis.text || '')}</p>
       </section>` : ''}
       ${(data.quote || data.quotes?.[0]) ? (() => {
         const q = data.quote || data.quotes[0]
@@ -168,10 +184,28 @@ export async function trackView(root) {
       <p class="track-privacy">Por privacidad, la clave de seguimiento no quedó guardada ni en la URL. Para revisar de nuevo, consulta desde el portal.</p>`
     bindLogout(root)
     mountTrackedDevice(page, data)
+    onLeave(bindReceiptPrint(page))
   } catch (e) {
     page.innerHTML = `
       <h1 tabindex="-1">Detalle del caso</h1>
       <div class="notice notice-error" role="alert">${esc(e?.message || 'No se pudo consultar este caso.')} <a href="#/portal">Volver al portal</a></div>`
+  }
+}
+
+export function bindReceiptPrint(page, print = () => globalThis.window?.print?.()) {
+  const button = page.querySelector('[data-track-print]')
+  const receipt = page.querySelector('[data-track-receipt]')
+  if (!button || !receipt) return () => {}
+  const listener = () => {
+    receipt.open = true
+    globalThis.document?.body?.classList.add('print-track-receipt')
+    print()
+    globalThis.document?.body?.classList.remove('print-track-receipt')
+  }
+  button.addEventListener('click', listener)
+  return () => {
+    button.removeEventListener('click', listener)
+    globalThis.document?.body?.classList.remove('print-track-receipt')
   }
 }
 

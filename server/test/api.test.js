@@ -892,6 +892,10 @@ if (!hasDatabase) {
     assert.equal(validTrack.body.data.case_number, caseData.case_number);
     assert.equal(validTrack.body.data.client, undefined);
     assert.equal(validTrack.body.data.terminal.brand, terminal.brand);
+    assert.equal(validTrack.body.data.terminal.initial_condition, 'Buen estado');
+    assert.equal(validTrack.body.data.terminal.accessories, 'Cargador');
+    assert.equal(validTrack.body.data.reported_problem, 'No enciende');
+    assert.equal(validTrack.body.data.terminal.imei, undefined);
 
     const invalidTrack = await makeAgent().request('/api/track', {
       method: 'POST',

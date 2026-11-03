@@ -5,6 +5,7 @@ import { workShell, requireAuth, onLeave } from '../layout/work.js'
 import { loadAllPages } from '../paged-data.js'
 import { INTAKE_FIELDS, activeIntakeClients, intakeErrorElement, intakeState, intakeTerminalsForClient } from '../intake-state.js'
 import { createIntakeDevicePreview } from '../intake-device-preview.js'
+import { bindIntakeReceiptPrint, intakeReceiptMarkup } from '../intake-receipt.js'
 import '../styles/intake.css'
 import gsap from 'gsap'
 
@@ -321,16 +322,15 @@ export async function newCaseView(root) {
     }).then(({ data }) => {
       if (!viewActive) return
       devicePreview.clear()
-      // El número y la clave solo se entregan una vez: se muestran aquí, sin re-simular luego.
+      const client = clients.find(item => String(item.id) === String(f.get('client_id')))
+      const terminal = terminals.find(item => String(item.id) === String(f.get('terminal_id')))
       showResult(`
         <div class="notice notice-ok" role="status" tabindex="-1" aria-live="polite">
-          <p style="margin:.2rem 0 .4rem"><b>Caso abierto.</b> Entregue estos datos al cliente ahora; no volverán a mostrarse:</p>
-          <dl class="kv">
-            <dt>Número de caso</dt><dd class="mono" style="font-size:1.2rem">${esc(data.case_number)}</dd>
-            <dt>Clave de seguimiento</dt><dd class="mono" style="font-size:1.2rem">${esc(data.tracking_token)}</dd>
-          </dl>
+          <p><b>Caso abierto.</b> Imprime o entrega este comprobante al cliente ahora. La clave se muestra una sola vez.</p>
         </div>
-        <a class="btn btn-primary" href="#/cases/${esc(data.id)}">Ir al caso</a>`, '[role="status"]', true)
+        ${intakeReceiptMarkup({ caseNumber: data.case_number, trackingToken: data.tracking_token, clientName: client?.full_name, terminal, reportedProblem: f.get('reported_problem'), receivedAt: data.created_at })}
+        <a class="btn btn-ghost" href="#/cases/${esc(data.id)}">Ir al caso del taller</a>`, '[role="status"]', true)
+      onLeave(bindIntakeReceiptPrint(result))
     }).catch(e => {
       if (!viewActive) return
       showResult(`<div class="notice notice-error" role="alert" tabindex="-1">${esc(e?.message || 'No se pudo abrir el caso.')}</div>`, '[role="alert"]')
