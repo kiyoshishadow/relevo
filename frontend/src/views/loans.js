@@ -3,13 +3,12 @@ import { get, post } from '../api.js'
 import { esc, fmtDay } from '../util.js'
 import { workShell, requireAuth, onLeave } from '../layout/work.js'
 import { field } from '../ui.js'
-import { fleetDock } from '../loan-devices.js'
-import { bindLoanLocator, loanLocatorButton } from '../loan-locator-motion.js'
+import { fleetLocation as fleetDock, bindLoanLocator, loanLocatorButton } from '../loan-location.js'
 import '../styles/loans-motion.css'
+import '../styles/loan-location.css'
 import { gsap } from 'gsap'
 
 const listRequests = new WeakMap()
-const fleetMotion = new WeakMap()
 const loanGateMotion = new WeakMap()
 const loanLocator = new WeakMap()
 
@@ -132,87 +131,11 @@ export function wireLoanGate(box, opener, {
   }
 }
 
-function cleanupFleetMotion(root) {
-  const stop = fleetMotion.get(root)
-  if (!stop) return
-  fleetMotion.delete(root)
-  stop()
-}
-
-// Pausa la animación continua del muelle cuando la escena no se ve o la pestaña está oculta.
-function bindFleetMotion(root, main) {
-  cleanupFleetMotion(root)
-  const dock = main.querySelector('.fleet-dock')
-  if (!dock) return
-
-  let paused = null
-  const apply = next => {
-    if (next === paused) return
-    paused = next
-    dock.dataset.motion = next ? 'paused' : 'running'
-  }
-  const sync = visible => apply(document.hidden === true || !visible)
-
-  let visible = false
-  let refresh = () => {}
-  let stopObserver = () => {}
-
-  if (typeof IntersectionObserver === 'function') {
-    // Arranca en pausa; el observador reanuda solo cuando la escena vuelve a ser visible.
-    apply(true)
-    const observer = new IntersectionObserver(entries => {
-      const entry = entries[entries.length - 1]
-      if (!entry) return
-      visible = entry.isIntersecting
-      sync(visible)
-    }, { threshold: 0 })
-    observer.observe(dock)
-    stopObserver = () => observer.disconnect()
-  } else {
-    // Sin IntersectionObserver: medimos en scroll/resize, como máximo una vez por frame.
-    let frame = 0
-    const measure = () => {
-      frame = 0
-      const rect = dock.getBoundingClientRect()
-      const viewport = window.innerHeight || document.documentElement.clientHeight || 0
-      visible = rect.bottom > 0 && rect.top < viewport && rect.width > 0 && rect.height > 0
-      sync(visible)
-    }
-    const schedule = () => { if (!frame) frame = requestAnimationFrame(measure) }
-    refresh = schedule
-    window.addEventListener('scroll', schedule, { passive: true })
-    window.addEventListener('resize', schedule, { passive: true })
-    stopObserver = () => {
-      if (frame) cancelAnimationFrame(frame)
-      window.removeEventListener('scroll', schedule)
-      window.removeEventListener('resize', schedule)
-    }
-    measure()
-  }
-
-  const onVisibility = () => {
-    if (document.hidden === true) {
-      apply(true)
-      return
-    }
-    refresh()
-    sync(visible)
-  }
-  document.addEventListener('visibilitychange', onVisibility)
-
-  fleetMotion.set(root, () => {
-    stopObserver()
-    document.removeEventListener('visibilitychange', onVisibility)
-    dock.removeAttribute('data-motion')
-  })
-}
-
 export async function loansView(root) {
   if (!(await requireAuth(root))) return
   if (!root.isConnected) return
   onLeave(() => {
     cleanupLoanGate(root)
-    cleanupFleetMotion(root)
     cleanupLoanLocator(root)
   })
   root.innerHTML = workShell('Equipos de préstamo', 'Flota de respaldo', `<div class="skel">Cargando flota…</div>`)
@@ -230,7 +153,6 @@ async function load(root, q = '', status = '', page = 1) {
   listRequests.set(root, requestId)
   const main = root.querySelector('.work-main')
   cleanupLoanGate(root)
-  cleanupFleetMotion(root)
   cleanupLoanLocator(root)
   const isCurrent = () => listRequests.get(root) === requestId && main?.isConnected && root.contains(main)
   main.innerHTML = `
@@ -325,11 +247,11 @@ async function load(root, q = '', status = '', page = 1) {
     main.querySelector('[data-list]').innerHTML = `
         ${fleetDock(data || [])}
       <div class="table-wrap" tabindex="0" role="region" aria-label="Tabla de equipos de préstamo"><table>
-        <thead><tr><th scope="col">Equipo</th><th scope="col">Etiqueta / IMEI / serie</th><th scope="col">Estado</th><th scope="col">Asignado a</th><th scope="col">Localizador</th></tr></thead>
+        <thead><tr><th scope="col">Equipo</th><th scope="col">Etiqueta / IMEI / serie</th><th scope="col">Estado</th><th scope="col">Asignado a</th><th scope="col">Ubicación</th></tr></thead>
         <tbody>${(data || []).map(d => {
           const out = d.status === 'loaned' && d.active_loan
           const statusText = d.status === 'available'
-            ? 'Disponible en mostrador'
+            ? 'Disponible'
             : d.status === 'loaned'
               ? 'Entregado a cliente'
               : d.status === 'retired'
@@ -346,7 +268,6 @@ async function load(root, q = '', status = '', page = 1) {
         </tbody></table></div>
         ${pagination(meta, page)}`
     bindPagination(main, nextPage => load(root, q, status, nextPage))
-    bindFleetMotion(root, main)
     loanLocator.set(root, bindLoanLocator(main, data || [], { gsap }))
     if (filterFocus) main.querySelector(filterFocus)?.focus()
   } catch (e) {
