@@ -252,9 +252,10 @@ export async function mountPhone3d(host, button, status, { reduced = false, asse
   const explodedPose = [
     { x: 0, y: 0, z: -.18, rx: -.025, ry: -.025, rz: -.01 },
     { x: 1.05, y: .04, z: .52, rx: .055, ry: .035, rz: .035 },
-    { x: -.78, y: -.85, z: .72, rx: -.035, ry: -.02, rz: -.028 },
+    { x: -.78, y: -.35, z: .72, rx: -.035, ry: -.02, rz: -.028 },
     { x: -.78, y: .68, z: 1.08, rx: .045, ry: -.035, rz: .025 },
-    { x: .28, y: -.9, z: .92, rx: -.02, ry: -.03, rz: .015 },
+    // Keep the full-height cover clear of the cradle, including its focus scale.
+    { x: .28, y: .35, z: .92, rx: -.02, ry: -.03, rz: .015 },
     { x: .93, y: 1.0, z: .86, rx: .025, ry: Math.PI + .045, rz: -.025 },
   ]
   const focusLayer = index => {
