@@ -91,7 +91,7 @@
 .case-inspector__close:hover { border-color:var(--ci-amber); }
 .case-inspector__layout { display:grid; grid-template-columns:minmax(0,1.12fr) minmax(260px,.88fr); min-width:0; }
 .case-inspector__bench { min-width:0; padding:1rem clamp(.8rem,2.5vw,1.5rem) 1.25rem; }
-.case-inspector__stage { position:relative; display:grid; place-items:center; min-height:390px; overflow:hidden; isolation:isolate; border:1px solid #48504d; border-radius:13px; background:radial-gradient(ellipse at 52% 46%,#424949 0,#2b3132 41%,#202526 76%); }
+.case-inspector__stage { position:relative; display:grid; place-items:center; min-height:430px; overflow:visible; isolation:isolate; border:1px solid #48504d; border-radius:13px; background:radial-gradient(ellipse at 52% 46%,#424949 0,#2b3132 41%,#202526 76%); }
 .case-inspector__stage::before { content:''; position:absolute; inset:0; z-index:-1; opacity:.22; background-image:linear-gradient(#d6c29418 1px,transparent 1px),linear-gradient(90deg,#d6c29418 1px,transparent 1px); background-size:30px 30px; mask-image:radial-gradient(ellipse at center,#000 12%,transparent 78%); }
 .case-inspector__stage::after { content:''; position:absolute; width:min(64%,330px); aspect-ratio:1; left:50%; top:60%; border:1px solid #d9a44e63; border-radius:50%; transform:translate(-50%,-50%) rotateX(66deg); box-shadow:0 0 0 18px #d9a44e09,0 0 0 38px #d9a44e06; pointer-events:none; }
 .case-inspector__phone { z-index:1; width:min(54%,260px); min-width:150px; max-width:260px; aspect-ratio:360/520; filter:drop-shadow(0 22px 18px #080b0c88); }
@@ -104,6 +104,7 @@
 .case-inspector__controls button:hover,.case-inspector__parts button:hover { border-color:var(--ci-amber); }
 .case-inspector__controls [data-inspector-assembly] { color:#241d11; background:var(--ci-amber); border-color:var(--ci-amber); }
 .case-inspector__parts button[aria-pressed="true"] { border-color:var(--ci-amber); color:#211b11; background:#efcf91; box-shadow:inset 0 -2px #a56a1c; }
+.case-inspector__parts button[data-part-suggested="true"]:not([aria-pressed="true"]) { border-color:#d9a44e9c; color:#f3d59d; background:#d9a44e12; }
 .case-inspector__status { min-height:1.4em; margin:.7rem 0 0; color:#c5cbc5; font-size:.75rem; line-height:1.5; }
 .case-inspector__record { display:flex; flex-direction:column; gap:0; min-width:0; padding:1.2rem clamp(1rem,2.7vw,1.8rem); color:#343530; background:#f1eee5; border-left:1px solid #d4cdbb; }
 .case-inspector__record article { padding:.25rem 0 1.15rem; border-bottom:1px solid #d8d1c2; }
@@ -114,7 +115,7 @@
 .case-inspector__record small { display:block; margin-top:.55rem; color:#727166; font-size:.73rem; }
 .case-inspector__record-note { margin:auto 0 0; padding-top:1rem; color:#79776d; font-size:.72rem; line-height:1.5; }
 .case-inspector :is(button):focus-visible { outline:3px solid #f2c66f; outline-offset:3px; }
-@media(max-width:760px) { .case-inspector__layout { grid-template-columns:minmax(0,1fr); } .case-inspector__record { border-left:0; border-top:1px solid #d4cdbb; } .case-inspector__stage { min-height:340px; } .case-inspector__phone { width:min(56%,220px); } }
-@media(max-width:420px) { .case-inspector { border-radius:13px; } .case-inspector__header { gap:.55rem; padding:.95rem .8rem; } .case-inspector__close { padding:.45rem .6rem; } .case-inspector__bench { padding:.65rem; } .case-inspector__stage { min-height:300px; } .case-inspector__controls,.case-inspector__parts { gap:.38rem; } .case-inspector__controls button,.case-inspector__parts button { flex:1 1 auto; padding:.55rem .58rem; } }
+@media(max-width:760px) { .case-inspector__layout { grid-template-columns:minmax(0,1fr); } .case-inspector__record { border-left:0; border-top:1px solid #d4cdbb; } .case-inspector__stage { min-height:390px; } .case-inspector__phone { width:min(56%,220px); } }
+@media(max-width:420px) { .case-inspector { border-radius:13px; } .case-inspector__header { gap:.55rem; padding:.95rem .8rem; } .case-inspector__close { padding:.45rem .6rem; } .case-inspector__bench { padding:.65rem; } .case-inspector__stage { min-height:350px; } .case-inspector__controls,.case-inspector__parts { gap:.38rem; } .case-inspector__controls button,.case-inspector__parts button { flex:1 1 auto; padding:.55rem .58rem; } }
 @media(prefers-reduced-motion:reduce) { .case-inspector *, .case-inspector *::before, .case-inspector *::after { scroll-behavior:auto!important; animation-duration:.01ms!important; transition-duration:.01ms!important; } }
 @media print { .case-inspector { color:#222; background:#fff; box-shadow:none; } .case-inspector__bench { display:none; } .case-inspector__record { border:0; } }

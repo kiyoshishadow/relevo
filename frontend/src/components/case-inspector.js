@@ -9,11 +9,23 @@ function diagnosisText(cs) {
   return typeof value === 'string' ? value.trim() : ''
 }
 
+function suggestedPart(cs) {
+  const source = `${diagnosisText(cs)} ${cs?.reported_problem || ''}`.toLocaleLowerCase('es')
+  const matches = [
+    ['battery', /bater[ií]a|carga|autonom[ií]a|no mantiene/],
+    ['display', /pantalla|display|lcd|oled|t[aá]ctil/],
+    ['board', /placa|tarjeta|circuito|motherboard/],
+  ].filter(([, pattern]) => pattern.test(source))
+  return matches.length === 1 ? matches[0][0] : null
+}
+
 export function caseInspectorMarkup(cs = {}) {
   const profile = resolveDeviceProfile(cs.terminal?.brand, cs.terminal?.model)
   const device = [cs.terminal?.brand, cs.terminal?.model].filter(Boolean).join(' ') || 'Equipo sin identificar'
   const exactLabel = profile.exact ? 'Perfil de catálogo' : 'Modelo ilustrativo · perfil no identificado'
   const diagnosis = diagnosisText(cs)
+  const suggestedKey = suggestedPart(cs)
+  const suggestedLabel = { battery: 'Batería', display: 'Pantalla', board: 'Placa' }[suggestedKey]
   const id = `case-inspector-phone-${String(cs.id ?? 'case').replace(/[^a-zA-Z0-9_-]/g, '-')}`
   return `<section class="case-inspector" id="case-inspector-${esc(cs.id)}" data-case-inspector hidden aria-labelledby="case-inspector-title">
     <header class="case-inspector__header">
@@ -33,16 +45,16 @@ export function caseInspectorMarkup(cs = {}) {
           <button class="case-inspector__full" type="button" data-inspector-full>Vista completa</button>
         </div>
         <div class="case-inspector__parts" role="group" aria-label="Seleccionar componente">
-          <button type="button" data-part-key="display" aria-pressed="false">Pantalla</button>
-          <button type="button" data-part-key="battery" aria-pressed="false">Batería</button>
-          <button type="button" data-part-key="board" aria-pressed="false">Placa</button>
+          <button type="button" data-part-key="display" aria-pressed="false"${suggestedKey === 'display' ? ' data-part-suggested="true"' : ''}>Pantalla${suggestedKey === 'display' ? ' · posible relación' : ''}</button>
+          <button type="button" data-part-key="battery" aria-pressed="false"${suggestedKey === 'battery' ? ' data-part-suggested="true"' : ''}>Batería${suggestedKey === 'battery' ? ' · posible relación' : ''}</button>
+          <button type="button" data-part-key="board" aria-pressed="false"${suggestedKey === 'board' ? ' data-part-suggested="true"' : ''}>Placa${suggestedKey === 'board' ? ' · posible relación' : ''}</button>
         </div>
-        <p class="case-inspector__status" data-inspector-status role="status" aria-live="polite">Teléfono ensamblado. Selecciona una pieza para inspeccionar el modelo o el diagrama esquemático.</p>
+        <p class="case-inspector__status" data-inspector-status role="status" aria-live="polite">${suggestedLabel ? `${esc(suggestedLabel)} sugerida por el texto del expediente. La selección es orientativa y no confirma la pieza averiada.` : 'Teléfono ensamblado. Selecciona una pieza para inspeccionar el modelo o el diagrama esquemático.'}</p>
       </div>
       <aside class="case-inspector__record" aria-label="Registro del caso">
         <article><p class="case-inspector__record-label">01 / RECEPCIÓN</p><h3>Problema reportado</h3><p>${esc(cs.reported_problem || 'No hay problema reportado en el expediente.')}</p></article>
         <article><p class="case-inspector__record-label">02 / DIAGNÓSTICO</p><h3>Registro técnico</h3><p>${esc(diagnosis || 'Aún no hay un diagnóstico registrado.')}</p>${cs.diagnosis?.problem_type || cs.problem_type ? `<small>Tipo registrado: ${esc(cs.diagnosis?.problem_type || cs.problem_type)}</small>` : ''}</article>
-        <p class="case-inspector__record-note">El expediente no vincula una pieza seleccionada con una avería. Esta escena sirve para orientación visual.</p>
+        <p class="case-inspector__record-note">${suggestedLabel ? `“${esc(suggestedLabel)}” se sugiere solo por las palabras del reporte o diagnóstico. La confirmación de la pieza requiere inspección técnica.` : 'El expediente no identifica una pieza concreta. Esta escena sirve para orientación visual.'}</p>
       </aside>
     </div>
   </section>`
@@ -85,8 +97,8 @@ export function mountCaseInspector(main, cs) {
   const media = window.matchMedia('(prefers-reduced-motion: reduce)')
   let generation = 0
   let cleanup3d = null
-  let selectedKey = null
-  let assembled = true
+  let selectedKey = panel.querySelector('[data-part-suggested="true"]')?.dataset.partKey || null
+  let assembled = !selectedKey
   let opened = false
   let disposed = false
   let mounting = false
@@ -178,6 +190,12 @@ export function mountCaseInspector(main, cs) {
     opened = true
     panel.hidden = false
     openButton.setAttribute('aria-expanded', 'true')
+    if (selectedKey) {
+      assembled = false
+      host.dataset.assembled = 'false'
+      assemblyButton.setAttribute('aria-pressed', 'false')
+      assemblyButton.textContent = 'Armar el teléfono'
+    }
     void mount()
     panel.scrollIntoView({ behavior: media.matches ? 'instant' : 'smooth', block: 'nearest' })
   }
