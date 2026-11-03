@@ -93,11 +93,12 @@ export function mountCaseInspector(main, cs) {
   const fullButton = panel.querySelector('[data-inspector-full]')
   const status = panel.querySelector('[data-inspector-status]')
   const partButtons = [...panel.querySelectorAll('[data-part-key]')]
+  const suggestedKey = partButtons.find(button => button.dataset.partSuggested === 'true')?.dataset.partKey || null
   const profile = resolveDeviceProfile(cs.terminal?.brand, cs.terminal?.model)
   const media = window.matchMedia('(prefers-reduced-motion: reduce)')
   let generation = 0
   let cleanup3d = null
-  let selectedKey = panel.querySelector('[data-part-suggested="true"]')?.dataset.partKey || null
+  let selectedKey = suggestedKey
   let assembled = !selectedKey
   let opened = false
   let disposed = false
@@ -205,9 +206,9 @@ export function mountCaseInspector(main, cs) {
     generation++
     mounting = false
     stop3d()
-    selectedKey = null
     assembled = true
     clearSelection()
+    selectedKey = suggestedKey
     assemblyButton.setAttribute('aria-pressed', 'true')
     assemblyButton.textContent = 'Explorar las capas'
     panel.hidden = true
