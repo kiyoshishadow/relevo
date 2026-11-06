@@ -1,6 +1,7 @@
 import { esc } from '../util.js'
 import { phoneSvgHtml, setPhoneSvgPose } from './phone.js'
 import { resolveDeviceProfile } from './device-profiles.js'
+import { gsap } from 'gsap'
 
 const instances = new WeakMap()
 
@@ -29,7 +30,7 @@ export function caseInspectorMarkup(cs = {}) {
   const id = `case-inspector-phone-${String(cs.id ?? 'case').replace(/[^a-zA-Z0-9_-]/g, '-')}`
   return `<section class="case-inspector" id="case-inspector-${esc(cs.id)}" data-case-inspector hidden aria-labelledby="case-inspector-title">
     <header class="case-inspector__header">
-      <div><p class="case-inspector__eyebrow">MESA DE INSPECCIÓN · ESQUEMA INTERNO</p><h2 id="case-inspector-title">${esc(device)}</h2><p>${esc(exactLabel)}. Las capas internas representan componentes comunes, no un despiece verificado del modelo.</p></div>
+      <div><p class="case-inspector__eyebrow">MESA DE INSPECCIÓN · ESQUEMA INTERNO</p><h2 id="case-inspector-title" tabindex="-1">${esc(device)}</h2><p>${esc(exactLabel)}. Las capas internas representan componentes comunes, no un despiece verificado del modelo.</p></div>
       <button class="case-inspector__close" type="button" data-case-inspector-close aria-label="Cerrar inspección">Cerrar</button>
     </header>
     <div class="case-inspector__layout">
@@ -45,13 +46,14 @@ export function caseInspectorMarkup(cs = {}) {
           <button class="case-inspector__full" type="button" data-inspector-full>Vista completa</button>
         </div>
         <div class="case-inspector__parts" role="group" aria-label="Seleccionar componente">
-          <button type="button" data-part-key="display" aria-pressed="false"${suggestedKey === 'display' ? ' data-part-suggested="true"' : ''}>Pantalla${suggestedKey === 'display' ? ' · posible relación' : ''}</button>
-          <button type="button" data-part-key="battery" aria-pressed="false"${suggestedKey === 'battery' ? ' data-part-suggested="true"' : ''}>Batería${suggestedKey === 'battery' ? ' · posible relación' : ''}</button>
-          <button type="button" data-part-key="board" aria-pressed="false"${suggestedKey === 'board' ? ' data-part-suggested="true"' : ''}>Placa${suggestedKey === 'board' ? ' · posible relación' : ''}</button>
+          <button type="button" data-part-key="display" aria-pressed="false"${suggestedKey === 'display' ? ' data-part-suggested="true"' : ''}>Pantalla</button>
+          <button type="button" data-part-key="battery" aria-pressed="false"${suggestedKey === 'battery' ? ' data-part-suggested="true"' : ''}>Batería</button>
+          <button type="button" data-part-key="board" aria-pressed="false"${suggestedKey === 'board' ? ' data-part-suggested="true"' : ''}>Placa</button>
         </div>
         <p class="case-inspector__status" data-inspector-status role="status" aria-live="polite">${suggestedLabel ? `${esc(suggestedLabel)} sugerida por el texto del expediente. La selección es orientativa y no confirma la pieza averiada.` : 'Teléfono ensamblado. Selecciona una pieza para inspeccionar el modelo o el diagrama esquemático.'}</p>
       </div>
       <aside class="case-inspector__record" aria-label="Registro del caso">
+        ${suggestedLabel ? `<div class="case-inspector__reference" data-inspector-reference><span class="case-inspector__reference-label">Mencionada en el expediente</span><strong>${esc(suggestedLabel)}</strong><p data-inspector-relation>Selecciona la pieza para relacionarla con el registro.</p><button type="button" data-inspector-reference-select>Volver a ${esc(suggestedLabel).toLocaleLowerCase('es')}</button></div>` : ''}
         <article><p class="case-inspector__record-label">01 / RECEPCIÓN</p><h3>Problema reportado</h3><p>${esc(cs.reported_problem || 'No hay problema reportado en el expediente.')}</p></article>
         <article><p class="case-inspector__record-label">02 / DIAGNÓSTICO</p><h3>Registro técnico</h3><p>${esc(diagnosis || 'Aún no hay un diagnóstico registrado.')}</p>${cs.diagnosis?.problem_type || cs.problem_type ? `<small>Tipo registrado: ${esc(cs.diagnosis?.problem_type || cs.problem_type)}</small>` : ''}</article>
         <p class="case-inspector__record-note">${suggestedLabel ? `“${esc(suggestedLabel)}” se sugiere solo por las palabras del reporte o diagnóstico. La confirmación de la pieza requiere inspección técnica.` : 'El expediente no identifica una pieza concreta. Esta escena sirve para orientación visual.'}</p>
@@ -93,6 +95,8 @@ export function mountCaseInspector(main, cs) {
   const fullButton = panel.querySelector('[data-inspector-full]')
   const status = panel.querySelector('[data-inspector-status]')
   const partButtons = [...panel.querySelectorAll('[data-part-key]')]
+  const referenceButton = panel.querySelector('[data-inspector-reference-select]')
+  const relation = panel.querySelector('[data-inspector-relation]')
   const suggestedKey = partButtons.find(button => button.dataset.partSuggested === 'true')?.dataset.partKey || null
   const profile = resolveDeviceProfile(cs.terminal?.brand, cs.terminal?.model)
   const media = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -103,9 +107,22 @@ export function mountCaseInspector(main, cs) {
   let opened = false
   let disposed = false
   let mounting = false
+  const motion = gsap.context(() => {}, panel)
+  let transition = null
+  const syncReference = () => {
+    const pressed = partButtons.find(button => button.getAttribute('aria-pressed') === 'true')
+    const linked = pressed?.dataset.partKey === suggestedKey
+    panel.dataset.recordLinked = String(Boolean(linked))
+    if (relation) relation.textContent = linked
+      ? 'Pieza seleccionada · consulta el texto registrado abajo.'
+      : pressed ? `Explorando ${pressed.textContent.split(' · ')[0]}. La mención del expediente se mantiene.`
+        : 'Selecciona la pieza para relacionarla con el registro.'
+    if (referenceButton) referenceButton.hidden = Boolean(linked)
+  }
   const selectionObserver = new MutationObserver(() => {
     const pressed = partButtons.find(button => button.getAttribute('aria-pressed') === 'true')
     if (pressed) selectedKey = pressed.dataset.partKey
+    syncReference()
   })
   partButtons.forEach(button => selectionObserver.observe(button, { attributes: true, attributeFilter: ['aria-pressed'] }))
 
@@ -190,6 +207,7 @@ export function mountCaseInspector(main, cs) {
     if (disposed || opened) return
     opened = true
     panel.hidden = false
+    panel.inert = false
     openButton.setAttribute('aria-expanded', 'true')
     if (selectedKey) {
       assembled = false
@@ -198,6 +216,16 @@ export function mountCaseInspector(main, cs) {
       assemblyButton.textContent = 'Armar el teléfono'
     }
     void mount()
+    if (!transition) motion.add(() => {
+      transition = gsap.fromTo(panel, { opacity: 0, y: 12, clipPath: 'inset(0 0 100% 0 round 18px)' }, {
+        opacity: 1, y: 0, clipPath: 'inset(0 0 0% 0 round 18px)', duration: .42,
+        ease: 'power2.out', paused: true,
+        onReverseComplete: () => { if (!opened) panel.hidden = true },
+      })
+    })
+    transition.timeScale(1).play()
+    if (media.matches) transition.progress(1).pause()
+    panel.querySelector('h2').focus({ preventScroll: true })
     panel.scrollIntoView({ behavior: media.matches ? 'instant' : 'smooth', block: 'nearest' })
   }
   const close = () => {
@@ -211,11 +239,20 @@ export function mountCaseInspector(main, cs) {
     selectedKey = suggestedKey
     assemblyButton.setAttribute('aria-pressed', 'true')
     assemblyButton.textContent = 'Explorar las capas'
-    panel.hidden = true
+    panel.inert = true
+    transition?.timeScale(1.6).reverse()
+    if (media.matches || !transition || transition.progress() === 0) {
+      transition?.progress(0).pause()
+      panel.hidden = true
+    }
     openButton.setAttribute('aria-expanded', 'false')
     openButton.focus({ preventScroll: true })
   }
   const onReducedChange = () => {
+    if (media.matches && transition) {
+      transition.progress(opened ? 1 : 0).pause()
+      panel.hidden = !opened
+    }
     if (!opened) return
     stop3d()
     mounting = false
@@ -268,6 +305,21 @@ export function mountCaseInspector(main, cs) {
       status.textContent = 'Vista completa. Selecciona una pieza para consultar el diagrama esquemático.'
     }
   }
+  const onEscape = event => {
+    if (event.key !== 'Escape' || !opened) return
+    event.preventDefault()
+    close()
+  }
+  const onReference = () => {
+    const button = partButtons.find(item => item.dataset.partKey === suggestedKey)
+    button?.click()
+    button?.focus({ preventScroll: true })
+  }
+  panel.addEventListener('keydown', onEscape)
+  referenceButton?.addEventListener('click', onReference)
+  partButtons.forEach(button => {
+    button.setAttribute('aria-label', `${button.textContent.split(' · ')[0]}${button.dataset.partSuggested ? ', mencionada en el expediente' : ''}`)
+  })
   openButton.addEventListener('click', open)
   closeButton.addEventListener('click', close)
   fullButton.addEventListener('click', onFull)
@@ -282,6 +334,9 @@ export function mountCaseInspector(main, cs) {
     generation++
     mounting = false
     stop3d()
+    motion.revert()
+    panel.removeEventListener('keydown', onEscape)
+    referenceButton?.removeEventListener('click', onReference)
     media.removeEventListener?.('change', onReducedChange)
     openButton.removeEventListener('click', open)
     closeButton.removeEventListener('click', close)

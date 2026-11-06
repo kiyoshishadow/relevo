@@ -3,6 +3,7 @@ import * as THREE from 'three/webgpu'
 import gsap from 'gsap'
 import { describeAssembly, readAssemblyState } from './phone.js'
 import { createStudioEnvironment } from './studio-environment.js'
+import { mountPhoneCallouts } from './phone-callouts.js'
 
 export function makeRounded(w, h, d, radius = .12) {
   // XY silhouette rounding must be independent of this thin part's Z depth.
@@ -146,6 +147,8 @@ export async function mountPhone3d(host, button, status, { reduced = false, asse
   let disposed = false
   let renderFrame = 0
   let environmentTexture = null
+  let annotations = null
+  let sweepTexture = null
   const mats = []
   const scene = new THREE.Scene()
   const cleanupScene = () => {
@@ -175,6 +178,8 @@ export async function mountPhone3d(host, button, status, { reduced = false, asse
     mats.forEach(m => m.dispose())
     scene.environment = null
     environmentTexture?.dispose(); environmentTexture = null
+    sweepTexture?.dispose(); sweepTexture = null
+    annotations?.dispose(); annotations = null
     renderer?.dispose(); renderer?.domElement.remove()
     renderer = null
   }
@@ -241,7 +246,7 @@ export async function mountPhone3d(host, button, status, { reduced = false, asse
   const cameraTarget = new THREE.Vector3(0, 0, 0)
   let phoneRoot = null
   const assembledFov = 25
-  const explodedFov = 29.5
+  const explodedFov = 32
   let screenSweep = null
   let screenSweepMat = null
   let dockPulse = null
@@ -252,7 +257,7 @@ export async function mountPhone3d(host, button, status, { reduced = false, asse
   const explodedPose = [
     { x: 0, y: 0, z: -.18, rx: -.025, ry: -.025, rz: -.01 },
     // Present the display in front of the chassis and the rear cover.
-    { x: 1.12, y: .16, z: 1.45, rx: .055, ry: .035, rz: .035 },
+    { x: 1.42, y: .16, z: 1.45, rx: .055, ry: .035, rz: .035 },
     { x: -.78, y: -.35, z: .72, rx: -.035, ry: -.02, rz: -.028 },
     { x: -.78, y: .68, z: 1.08, rx: .045, ry: -.035, rz: .025 },
     // Keep the full-height cover clear of the cradle, including its focus scale.
@@ -474,6 +479,7 @@ export async function mountPhone3d(host, button, status, { reduced = false, asse
   renderer.domElement.setAttribute('aria-hidden', 'true')
   renderer.domElement.dataset.renderer = renderer.backend?.isWebGPUBackend ? 'webgpu' : 'webgl2-fallback'
   host.append(renderer.domElement)
+  if (partButtons.length) annotations = mountPhoneCallouts(host)
 
   scene.add(new THREE.HemisphereLight(0xf5f0e7, 0x272b2c, 2.25))
   const key = new THREE.DirectionalLight(0xffd27a, 4.25)
@@ -526,7 +532,8 @@ export async function mountPhone3d(host, button, status, { reduced = false, asse
   // gives the one-shot click response a physical surface to travel across.
   const dockTop = -2.175 * phoneRoot.scale.y
   cylinder(scene, 1.34, 1.46, .14, darkMetal, [0, dockTop - .135, 0])
-  cylinder(scene, 1.26, 1.34, .05, metal, [0, dockTop - .04, 0])
+  const dockSurface = material(0xb9b3a4, .55, .62)
+  cylinder(scene, 1.26, 1.34, .05, dockSurface, [0, dockTop - .04, 0])
   const dockTrim = mesh(scene, new THREE.TorusGeometry(1.18, .018, 6, 48), glowLine, [0, dockTop - .009, 0])
   dockTrim.rotation.x = Math.PI / 2
   dockPulseMat = new THREE.MeshBasicMaterial({ color: 0xffd27a, transparent: true, opacity: 0, depthWrite: false })
@@ -699,9 +706,21 @@ export async function mountPhone3d(host, button, status, { reduced = false, asse
   cube(display, [.12, .12, .02], glowLine, [.54, .68, .067], .025)
   cube(chassis, [.32, .075, .05], darkMetal, [0, -2.12, .08], .035)
   for (let i = 0; i < 4; i++) mesh(chassis, new THREE.CircleGeometry(.018, 10), screwSlot, [-.32 + i * .11, -2.12, .108])
-  screenSweepMat = new THREE.MeshBasicMaterial({ color: 0xfff1c9, transparent: true, opacity: 0, depthWrite: false })
+  const sweepCanvas = document.createElement('canvas')
+  sweepCanvas.width = 128; sweepCanvas.height = 8
+  const sweepContext = sweepCanvas.getContext('2d')
+  if (sweepContext) {
+    const gradient = sweepContext.createLinearGradient(0, 0, 128, 0)
+    gradient.addColorStop(0, 'rgba(255,255,255,0)')
+    gradient.addColorStop(.5, 'rgba(255,255,255,.65)')
+    gradient.addColorStop(1, 'rgba(255,255,255,0)')
+    sweepContext.fillStyle = gradient
+    sweepContext.fillRect(0, 0, 128, 8)
+    sweepTexture = new THREE.CanvasTexture(sweepCanvas)
+  }
+  screenSweepMat = new THREE.MeshBasicMaterial({ color: 0xfff1c9, map: sweepTexture, transparent: true, opacity: 0, depthWrite: false })
   mats.push(screenSweepMat)
-  screenSweep = mesh(display, new THREE.PlaneGeometry(.22, 3.4), screenSweepMat, [-.75, 0, .075])
+  screenSweep = mesh(display, new THREE.PlaneGeometry(.65, 3.4), screenSweepMat, [-.75, 0, .075])
   screenSweep.rotation.z = -.14
   // Common schematic components, intentionally shared across catalog profiles.
   const battery = makeLayer('battery', -.1)
@@ -739,6 +758,31 @@ export async function mountPhone3d(host, button, status, { reduced = false, asse
   // The idle drift is tween-driven and pauses when the stage leaves the viewport.
   rotationOrigin = new THREE.Euler(BASE_SCENE_ROTATION.x, exteriorYaw + (profile && !assembled ? Math.PI : 0), BASE_SCENE_ROTATION.z)
   phoneRoot.rotation.copy(rotationOrigin)
+  let viewportWidth = 0, viewportHeight = 0
+  const anchorVectors = { 1: new THREE.Vector3(), 2: new THREE.Vector3(), 3: new THREE.Vector3() }
+  const focusBox = new THREE.Box3()
+  const corner = new THREE.Vector3()
+  const updateAnnotations = () => {
+    if (!annotations) return
+    scene.updateMatrixWorld(true)
+    camera.updateMatrixWorld(true)
+    anchorVectors[1].set(0, .4, .08)
+    anchorVectors[2].set(0, -.7, .18)
+    anchorVectors[3].set(0, 1.2, .18)
+    Object.entries(anchorVectors).forEach(([index, point]) => layers[index].localToWorld(point).project(camera))
+    let focusBounds = null
+    if (!assembled && focusedLayer !== null && layers[focusedLayer]) {
+      focusBox.setFromObject(layers[focusedLayer])
+      focusBounds = { left: Infinity, right: -Infinity, top: Infinity, bottom: -Infinity }
+      for (let i = 0; i < 8; i++) {
+        corner.set(i & 1 ? focusBox.max.x : focusBox.min.x, i & 2 ? focusBox.max.y : focusBox.min.y, i & 4 ? focusBox.max.z : focusBox.min.z).project(camera)
+        const x = (corner.x + 1) * viewportWidth / 2, y = (1 - corner.y) * viewportHeight / 2
+        focusBounds.left = Math.min(focusBounds.left, x); focusBounds.right = Math.max(focusBounds.right, x)
+        focusBounds.top = Math.min(focusBounds.top, y); focusBounds.bottom = Math.max(focusBounds.bottom, y)
+      }
+    }
+    annotations.update({ width: viewportWidth, height: viewportHeight, assembled, focused: focusedLayer, anchors: anchorVectors, focusBounds })
+  }
   draw = (force = false) => {
     if (!renderer || lostContext || (!force && (!isVisible || document.hidden))) return
     if (force) {
@@ -746,6 +790,7 @@ export async function mountPhone3d(host, button, status, { reduced = false, asse
       renderFrame = 0
       camera.lookAt(cameraTarget)
       renderer.render(scene, camera)
+      updateAnnotations()
       return
     }
     if (renderFrame) return
@@ -754,10 +799,12 @@ export async function mountPhone3d(host, button, status, { reduced = false, asse
       if (!renderer || lostContext || (!force && (!isVisible || document.hidden))) return
       camera.lookAt(cameraTarget)
       renderer.render(scene, camera)
+      updateAnnotations()
     })
   }
   const applySize = rect => {
     if (!rect?.width || !rect?.height) return
+    viewportWidth = rect.width; viewportHeight = rect.height
     renderer.setSize(rect.width, rect.height, false)
     camera.aspect = rect.width / rect.height
     camera.updateProjectionMatrix()

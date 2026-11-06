@@ -11,7 +11,7 @@ const LAYERS = [
 ]
 const SVG_SPREAD = [
   { x: -34, y: -8, rotation: -6 },
-  { x: 34, y: -4, rotation: 5 },
+  { x: 52, y: -4, rotation: 5 },
   { x: -25, y: 7, rotation: -4 },
   { x: 25, y: 12, rotation: 6 },
 ]
